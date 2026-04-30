@@ -116,7 +116,21 @@
   <div class="modal">
     <h3 id="modalTitle">Add activity</h3>
     <div class="field"><label>Activity name *</label><input id="fName" type="text" placeholder="e.g. Fushimi Inari Shrine"></div>
-    <div class="field"><label>Time</label><input id="fTime" type="text" placeholder="e.g. 9:00 AM, Morning, All day"></div>
+    <div class="field">
+      <label>Time</label>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input id="fTime" type="time" style="flex:1;">
+        <select id="fTimeLabel" style="flex:1;">
+          <option value="">-- or pick a label --</option>
+          <option value="Morning">Morning</option>
+          <option value="Afternoon">Afternoon</option>
+          <option value="Evening">Evening</option>
+          <option value="Night">Night</option>
+          <option value="All day">All day</option>
+        </select>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px;">Pick a time OR choose a label. Time picker is used for sorting.</div>
+    </div>
     <div class="field"><label>Category</label>
       <select id="fCat">
         <option value="sightseeing">Sightseeing</option>
@@ -183,7 +197,7 @@ function buildDays(){
     else{acts.forEach(function(a,ai){
       var isLast=ai===acts.length-1;
       actsHTML+='<div class="activity-row">'+
-        '<div class="act-time-col">'+esc(a.time||'')+'</div>'+
+        '<div class="act-time-col">'+esc(formatDisplayTime(a.time||''))+'</div>'+
         '<div class="act-dot-col"><div class="act-dot" style="background:'+col+'"></div>'+((!isLast)?'<div class="act-line"></div>':'')+'</div>'+
         '<div class="act-content">'+
           '<span class="act-cat-badge '+(badgeMap[a.cat]||'badge-activity')+'">'+( labelMap[a.cat]||a.cat)+'</span>'+
@@ -238,6 +252,7 @@ function openAdd(dayIdx){
   modalDayIdx=dayIdx;modalActIdx=null;modalMode='add';
   document.getElementById('modalTitle').textContent='Add activity \u2014 '+days[dayIdx].date;
   document.getElementById('fName').value='';document.getElementById('fTime').value='';
+  document.getElementById('fTimeLabel').value='';
   document.getElementById('fCat').value='sightseeing';document.getElementById('fAddr').value='';document.getElementById('fNotes').value='';
   document.getElementById('btnDelete').style.display='none';
   document.getElementById('modalBg').classList.add('open');
@@ -247,20 +262,53 @@ function openEdit(dayIdx,actIdx){
   modalDayIdx=dayIdx;modalActIdx=actIdx;modalMode='edit';
   var a=days[dayIdx].activities[actIdx];
   document.getElementById('modalTitle').textContent='Edit activity';
-  document.getElementById('fName').value=a.name||'';document.getElementById('fTime').value=a.time||'';
+  document.getElementById('fName').value=a.name||'';
+  var t=a.time||'';
+  var isRaw=t.match(/^\d{2}:\d{2}$/);
+  document.getElementById('fTime').value=isRaw?t:'';
+  document.getElementById('fTimeLabel').value=(!isRaw&&t)?t:'';
   document.getElementById('fCat').value=a.cat||'sightseeing';document.getElementById('fAddr').value=a.address||'';document.getElementById('fNotes').value=a.notes||'';
   document.getElementById('btnDelete').style.display='inline-block';
   document.getElementById('modalBg').classList.add('open');
   setTimeout(function(){document.getElementById('fName').focus();},80);
 }
 function closeModal(){document.getElementById('modalBg').classList.remove('open');}
+function getTimeValue(){
+  var t=document.getElementById('fTime').value.trim();
+  var l=document.getElementById('fTimeLabel').value;
+  if(t) return t; // "HH:MM" 24h format
+  if(l) return l;
+  return '';
+}
+function formatDisplayTime(t){
+  if(!t) return '';
+  // Convert 24h "HH:MM" to 12h display
+  var m=t.match(/^(\d{2}):(\d{2})$/);
+  if(!m) return t;
+  var h=parseInt(m[1]),min=m[2],ampm=h>=12?'PM':'AM';
+  h=h%12||12;
+  return h+':'+min+' '+ampm;
+}
+function getSortKey(t){
+  if(!t) return 9999;
+  var m=t.match(/^(\d{2}):(\d{2})$/);
+  if(m) return parseInt(m[1])*60+parseInt(m[2]);
+  var labels={Morning:480,Afternoon:720,Evening:1080,Night:1260,'All day':0};
+  return labels[t]!==undefined?labels[t]:9998;
+}
+function sortActivities(acts){
+  return acts.slice().sort(function(a,b){return getSortKey(a.time)-getSortKey(b.time);});
+}
 function saveActivity(){
   var name=document.getElementById('fName').value.trim();
   if(!name){document.getElementById('fName').focus();return;}
-  var act={id:uid(),name:name,time:document.getElementById('fTime').value.trim(),cat:document.getElementById('fCat').value,address:document.getElementById('fAddr').value.trim(),notes:document.getElementById('fNotes').value.trim()};
+  var timeVal=getTimeValue();
+  var act={id:uid(),name:name,time:timeVal,cat:document.getElementById('fCat').value,address:document.getElementById('fAddr').value.trim(),notes:document.getElementById('fNotes').value.trim()};
   var savedIdx=modalDayIdx;
-  if(modalMode==='add'){days[modalDayIdx].activities.push(act);showToast('Activity added');}
-  else{act.id=days[modalDayIdx].activities[modalActIdx].id;days[modalDayIdx].activities[modalActIdx]=act;showToast('Activity saved');}
+  if(modalMode==='add'){days[modalDayIdx].activities.push(act);}
+  else{act.id=days[modalDayIdx].activities[modalActIdx].id;days[modalDayIdx].activities[modalActIdx]=act;}
+  days[modalDayIdx].activities=sortActivities(days[modalDayIdx].activities);
+  showToast(modalMode==='add'?'Activity added':'Activity saved');
   saveData();closeModal();buildDays();
   setTimeout(function(){var c=document.querySelectorAll('.day-card');if(c[savedIdx])c[savedIdx].classList.add('open');},20);
 }
