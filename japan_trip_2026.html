@@ -6,103 +6,110 @@
 <title>Japan - May 2026</title>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  :root { --ink:#1a1a1a;--paper:#f7f4ee;--gold:#b8860b;--muted:#7a7468;--border:#ddd8cf;--white:#ffffff;--tokyo:#2c3e50;--fuji:#4a6741;--kyoto:#6b4c3b;--osaka:#7d3c5c;--okinawa:#1a5276;--card-radius:10px;--danger:#c0392b; }
-  * { box-sizing:border-box;margin:0;padding:0; }
-  body { font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh; }
-  .hero { background:var(--ink);color:var(--white);padding:3rem 2rem 2.5rem;text-align:center;position:relative;overflow:hidden; }
-  .hero::before { content:'\65E5\672C';position:absolute;font-family:'Shippori Mincho',serif;font-size:14rem;color:rgba(255,255,255,0.04);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;white-space:nowrap; }
-  .hero-tag { font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-bottom:0.75rem; }
-  .hero h1 { font-family:'Shippori Mincho',serif;font-size:clamp(2.2rem,5vw,3.8rem);font-weight:700;line-height:1.1;margin-bottom:0.75rem; }
-  .hero-sub { font-size:14px;color:rgba(255,255,255,0.5);font-weight:300;letter-spacing:0.05em; }
-  .summary-bar { background:var(--white);border-bottom:1px solid var(--border);padding:1rem 2rem;display:flex;gap:2rem;overflow-x:auto;justify-content:center;flex-wrap:wrap; }
-  .summary-stat { text-align:center;white-space:nowrap; }
-  .summary-stat .num { font-family:'Shippori Mincho',serif;font-size:1.6rem;font-weight:700;color:var(--ink);line-height:1; }
-  .summary-stat .lbl { font-size:11px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-top:2px; }
-  .summary-divider { width:1px;background:var(--border);align-self:stretch; }
-  .region-nav { padding:1.25rem 2rem 0;display:flex;gap:8px;overflow-x:auto;justify-content:center;flex-wrap:wrap; }
-  .region-pill { padding:6px 16px;border-radius:100px;font-size:12px;font-weight:500;cursor:pointer;border:1.5px solid transparent;transition:all 0.2s;white-space:nowrap;color:var(--white); }
-  .region-pill[data-region="all"] { background:var(--ink); }
-  .region-pill[data-region="tokyo"] { background:var(--tokyo); }
-  .region-pill[data-region="fuji"] { background:var(--fuji); }
-  .region-pill[data-region="kyoto"] { background:var(--kyoto); }
-  .region-pill[data-region="osaka"] { background:var(--osaka); }
-  .region-pill[data-region="okinawa"] { background:var(--okinawa); }
-  .region-pill.inactive { background:transparent!important;color:var(--muted);border-color:var(--border); }
-  .days-wrapper { padding:1.5rem 2rem 3rem;max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:12px; }
-  .day-card { background:var(--white);border-radius:var(--card-radius);border:1px solid var(--border);overflow:hidden; }
-  .day-card.hidden { display:none; }
-  .day-header { display:flex;align-items:stretch;cursor:pointer;user-select:none; }
-  .day-header:hover { background:#fafaf8; }
-  .day-color-bar { width:6px;flex-shrink:0; }
-  .day-header-inner { flex:1;display:flex;align-items:center;justify-content:space-between;padding:14px 16px;gap:12px; }
-  .day-left { display:flex;align-items:center;gap:14px; }
-  .day-num { font-family:'Shippori Mincho',serif;font-size:1.4rem;font-weight:700;color:var(--ink);line-height:1;min-width:36px; }
-  .day-date { font-size:13px;font-weight:500;color:var(--ink); }
-  .day-location { font-size:11px;color:var(--muted);margin-top:1px;letter-spacing:0.04em; }
-  .day-right { display:flex;align-items:center;gap:10px; }
-  .day-count { font-size:11px;color:var(--muted);white-space:nowrap; }
-  .chevron { font-size:14px;color:var(--muted);transition:transform 0.2s; }
-  .day-card.open .chevron { transform:rotate(180deg); }
-  .day-body { display:none;border-top:1px solid var(--border); }
-  .day-card.open .day-body { display:block; }
-  .activity-row { display:flex;align-items:flex-start;border-bottom:1px solid var(--border);position:relative;transition:background 0.15s; }
-  .activity-row:last-child { border-bottom:none; }
-  .activity-row:hover { background:#fdfcfa; }
-  .activity-row:hover .act-actions { opacity:1; }
-  .act-time-col { width:72px;flex-shrink:0;padding:14px 12px 12px 16px;font-size:12px;color:var(--muted);line-height:1.4; }
-  .act-dot-col { width:20px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;padding-top:18px; }
-  .act-dot { width:7px;height:7px;border-radius:50%;flex-shrink:0; }
-  .act-line { width:1px;flex:1;background:var(--border);margin-top:4px;min-height:16px; }
-  .act-content { flex:1;padding:12px 8px;min-width:0; }
-  .act-cat-badge { display:inline-block;font-size:10px;letter-spacing:0.07em;text-transform:uppercase;font-weight:500;padding:2px 7px;border-radius:4px;margin-bottom:4px; }
+  :root{--ink:#1a1a1a;--paper:#f7f4ee;--gold:#b8860b;--muted:#7a7468;--border:#ddd8cf;--white:#ffffff;--tokyo:#2c3e50;--fuji:#4a6741;--kyoto:#6b4c3b;--osaka:#7d3c5c;--okinawa:#1a5276;--danger:#c0392b;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh;}
+  .hero{background:var(--ink);color:var(--white);padding:3rem 2rem 2.5rem;text-align:center;position:relative;overflow:hidden;}
+  .hero::before{content:'\65E5\672C';position:absolute;font-family:'Shippori Mincho',serif;font-size:14rem;color:rgba(255,255,255,0.04);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;white-space:nowrap;}
+  .hero-tag{font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-bottom:0.75rem;}
+  .hero h1{font-family:'Shippori Mincho',serif;font-size:clamp(2.2rem,5vw,3.8rem);font-weight:700;line-height:1.1;margin-bottom:0.75rem;}
+  .hero-sub{font-size:14px;color:rgba(255,255,255,0.5);font-weight:300;letter-spacing:0.05em;}
+  .summary-bar{background:var(--white);border-bottom:1px solid var(--border);padding:1rem 2rem;display:flex;gap:2rem;overflow-x:auto;justify-content:center;flex-wrap:wrap;}
+  .summary-stat{text-align:center;white-space:nowrap;}
+  .summary-stat .num{font-family:'Shippori Mincho',serif;font-size:1.6rem;font-weight:700;color:var(--ink);line-height:1;}
+  .summary-stat .lbl{font-size:11px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-top:2px;}
+  .summary-divider{width:1px;background:var(--border);align-self:stretch;}
+  .region-nav{padding:1.25rem 2rem 0;display:flex;gap:8px;overflow-x:auto;justify-content:center;flex-wrap:wrap;}
+  .region-pill{padding:6px 16px;border-radius:100px;font-size:12px;font-weight:500;cursor:pointer;border:1.5px solid transparent;transition:all 0.2s;white-space:nowrap;color:var(--white);}
+  .region-pill[data-region="all"]{background:var(--ink);}
+  .region-pill[data-region="tokyo"]{background:var(--tokyo);}
+  .region-pill[data-region="fuji"]{background:var(--fuji);}
+  .region-pill[data-region="kyoto"]{background:var(--kyoto);}
+  .region-pill[data-region="osaka"]{background:var(--osaka);}
+  .region-pill[data-region="okinawa"]{background:var(--okinawa);}
+  .region-pill.inactive{background:transparent!important;color:var(--muted);border-color:var(--border);}
+  .days-wrapper{padding:1.5rem 2rem 3rem;max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:12px;}
+  .day-card{background:var(--white);border-radius:10px;border:1px solid var(--border);overflow:hidden;}
+  .day-card.hidden{display:none;}
+  .day-header{display:flex;align-items:stretch;cursor:pointer;user-select:none;}
+  .day-header:hover{background:#fafaf8;}
+  .day-color-bar{width:6px;flex-shrink:0;}
+  .day-header-inner{flex:1;display:flex;align-items:center;justify-content:space-between;padding:14px 16px;gap:12px;}
+  .day-left{display:flex;align-items:center;gap:14px;}
+  .day-num{font-family:'Shippori Mincho',serif;font-size:1.4rem;font-weight:700;color:var(--ink);line-height:1;min-width:36px;}
+  .day-date{font-size:13px;font-weight:500;color:var(--ink);}
+  .day-location{font-size:11px;color:var(--muted);margin-top:1px;}
+  .day-right{display:flex;align-items:center;gap:10px;}
+  .day-count{font-size:11px;color:var(--muted);white-space:nowrap;}
+  .chevron{font-size:14px;color:var(--muted);transition:transform 0.2s;}
+  .day-card.open .chevron{transform:rotate(180deg);}
+  .day-body{display:none;border-top:1px solid var(--border);}
+  .day-card.open .day-body{display:block;}
+  .activity-row{display:flex;align-items:flex-start;border-bottom:1px solid var(--border);transition:background 0.15s;}
+  .activity-row:last-child{border-bottom:none;}
+  .activity-row:hover{background:#fdfcfa;}
+  .activity-row:hover .act-actions{opacity:1;}
+  .act-time-col{width:72px;flex-shrink:0;padding:14px 12px 12px 16px;font-size:12px;color:var(--muted);line-height:1.4;}
+  .act-dot-col{width:20px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;padding-top:18px;}
+  .act-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+  .act-line{width:1px;flex:1;background:var(--border);margin-top:4px;min-height:16px;}
+  .act-content{flex:1;padding:12px 8px;min-width:0;}
+  .act-cat-badge{display:inline-block;font-size:10px;letter-spacing:0.07em;text-transform:uppercase;font-weight:500;padding:2px 7px;border-radius:4px;margin-bottom:4px;}
   .badge-transport{background:#e8f0fb;color:#1a5276}.badge-hotel{background:#f3eaf8;color:#6c3483}.badge-sightseeing{background:#eaf5ea;color:#1e8449}.badge-food{background:#fdf2e9;color:#a04000}.badge-activity{background:#fef9e7;color:#9a7d0a}.badge-theme-park{background:#fdeef0;color:#a93226}.badge-nature{background:#e9f7ef;color:#1a7a46}.badge-shopping{background:#fdf5e0;color:#8a6000}.badge-beach{background:#e8f6fd;color:#117a8b}.badge-rental{background:#f0f0f0;color:#555}
-  .act-name { font-size:14px;font-weight:500;color:var(--ink);line-height:1.3; }
-  .act-address { font-size:12px;color:var(--muted);margin-top:3px; }
-  .act-address::before { content:'\uD83D\uDCCD ';font-size:10px; }
-  .act-notes { font-size:12px;color:var(--muted);margin-top:4px;font-style:italic;line-height:1.5; }
-  .act-actions { display:flex;flex-direction:column;gap:4px;padding:10px 10px 10px 0;opacity:0;transition:opacity 0.15s;flex-shrink:0; }
-  .act-btn { border:none;background:none;cursor:pointer;font-size:12px;padding:3px 7px;border-radius:5px;color:var(--muted);transition:background 0.1s,color 0.1s;white-space:nowrap; }
+  .act-name{font-size:14px;font-weight:500;color:var(--ink);line-height:1.3;}
+  .act-address{font-size:12px;color:var(--muted);margin-top:3px;}
+  .act-address::before{content:'📍 ';font-size:10px;}
+  .act-notes{font-size:12px;color:var(--muted);margin-top:4px;font-style:italic;line-height:1.5;}
+  .act-actions{display:flex;flex-direction:column;gap:4px;padding:10px 10px 10px 0;opacity:0;transition:opacity 0.15s;flex-shrink:0;}
+  .act-btn{border:none;background:none;cursor:pointer;font-size:12px;padding:3px 7px;border-radius:5px;color:var(--muted);transition:background 0.1s,color 0.1s;white-space:nowrap;}
   .act-btn:hover{background:var(--border);color:var(--ink)}.act-btn.del:hover{background:#fdeef0;color:var(--danger)}
-  .empty-day { padding:20px 16px;font-size:13px;color:var(--muted);font-style:italic;text-align:center; }
-  .add-act-row { padding:10px 16px;display:flex;justify-content:flex-end;border-top:1px dashed var(--border);background:#fdfcfa; }
-  .add-act-btn { background:none;border:1px dashed var(--border);border-radius:6px;padding:5px 14px;font-size:12px;color:var(--muted);cursor:pointer;transition:all 0.15s; }
-  .add-act-btn:hover { border-color:var(--ink);color:var(--ink);background:var(--white); }
-  .modal-bg { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;align-items:center;justify-content:center;padding:1rem; }
-  .modal-bg.open { display:flex; }
-  .modal { background:var(--white);border-radius:14px;padding:1.75rem;width:100%;max-width:420px;box-shadow:0 8px 40px rgba(0,0,0,0.18);max-height:90vh;overflow-y:auto; }
-  .modal h3 { font-size:16px;font-weight:500;margin-bottom:1.25rem;color:var(--ink); }
-  .field { margin-bottom:14px; }
-  .field label { font-size:12px;color:var(--muted);display:block;margin-bottom:5px;font-weight:500;letter-spacing:0.03em; }
-  .field input,.field select,.field textarea { width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);outline:none;transition:border-color 0.15s; }
-  .field input:focus,.field select:focus,.field textarea:focus { border-color:#aaa;background:var(--white); }
-  .field textarea { resize:vertical;min-height:70px;line-height:1.5; }
-  .modal-actions { display:flex;gap:8px;justify-content:flex-end;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border); }
-  .mbtn { padding:8px 18px;border-radius:7px;font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;border:1px solid var(--border);background:var(--white);color:var(--ink);transition:background 0.15s; }
+  .empty-day{padding:20px 16px;font-size:13px;color:var(--muted);font-style:italic;text-align:center;}
+  .add-act-row{padding:10px 16px;display:flex;justify-content:flex-end;border-top:1px dashed var(--border);background:#fdfcfa;}
+  .add-act-btn{background:none;border:1px dashed var(--border);border-radius:6px;padding:5px 14px;font-size:12px;color:var(--muted);cursor:pointer;transition:all 0.15s;}
+  .add-act-btn:hover{border-color:var(--ink);color:var(--ink);background:var(--white);}
+  .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;align-items:center;justify-content:center;padding:1rem;}
+  .modal-bg.open{display:flex;}
+  .modal{background:var(--white);border-radius:14px;padding:1.75rem;width:100%;max-width:420px;box-shadow:0 8px 40px rgba(0,0,0,0.18);max-height:90vh;overflow-y:auto;}
+  .modal h3{font-size:16px;font-weight:500;margin-bottom:1.25rem;color:var(--ink);}
+  .field{margin-bottom:14px;}
+  .field label{font-size:12px;color:var(--muted);display:block;margin-bottom:5px;font-weight:500;}
+  .field input,.field select,.field textarea{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);outline:none;transition:border-color 0.15s;}
+  .field input:focus,.field select:focus,.field textarea:focus{border-color:#aaa;background:var(--white);}
+  .field textarea{resize:vertical;min-height:70px;line-height:1.5;}
+  .time-row{display:flex;gap:8px;}
+  .time-row input,.time-row select{flex:1;}
+  .field-hint{font-size:11px;color:var(--muted);margin-top:4px;}
+  .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border);}
+  .mbtn{padding:8px 18px;border-radius:7px;font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;border:1px solid var(--border);background:var(--white);color:var(--ink);transition:background 0.15s;}
   .mbtn:hover{background:var(--paper)}.mbtn.primary{background:var(--ink);color:var(--white);border-color:var(--ink)}.mbtn.primary:hover{background:#333}.mbtn.danger{color:var(--danger);border-color:#f5c6c2}.mbtn.danger:hover{background:#fdeef0}
-  .toast { position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(10px);background:var(--ink);color:var(--white);padding:10px 20px;border-radius:100px;font-size:13px;opacity:0;transition:all 0.3s;z-index:300;pointer-events:none;white-space:nowrap; }
-  .toast.show { opacity:1;transform:translateX(-50%) translateY(0); }
-  .footer { text-align:center;padding:2rem;font-size:12px;color:var(--muted);border-top:1px solid var(--border); }
+  .toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(10px);background:var(--ink);color:var(--white);padding:10px 20px;border-radius:100px;font-size:13px;opacity:0;transition:all 0.3s;z-index:300;pointer-events:none;white-space:nowrap;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .sync-bar{position:fixed;top:0;left:0;right:0;background:#1a1a1a;color:#fff;font-size:12px;text-align:center;padding:6px;z-index:400;transform:translateY(-100%);transition:transform 0.3s;}
+  .sync-bar.show{transform:translateY(0);}
+  .loading{text-align:center;padding:4rem;color:var(--muted);font-size:14px;}
+  .footer{text-align:center;padding:2rem;font-size:12px;color:var(--muted);border-top:1px solid var(--border);}
   @media(max-width:600px){.hero{padding:2rem 1rem 1.5rem}.days-wrapper{padding:1rem 1rem 3rem}.act-time-col{width:54px;font-size:11px;padding-left:10px}.act-actions{opacity:1}}
 </style>
 </head>
 <body>
+<div class="sync-bar" id="syncBar"></div>
 <div class="hero">
   <div class="hero-tag">Group trip &middot; 3&ndash;4 people</div>
   <h1>Japan<br>May 2026</h1>
-  <div class="hero-sub">May 3 &ndash; May 19 &nbsp;&middot;&nbsp; YVR &rarr; HND &nbsp;&middot;&nbsp; 16 nights</div>
+  <div class="hero-sub">May 3 &ndash; May 19 &nbsp;&middot;&nbsp; YVR &rarr; HND &nbsp;&middot;&nbsp; 17 nights</div>
 </div>
 <div class="summary-bar">
   <div class="summary-stat"><div class="num">17</div><div class="lbl">Nights</div></div>
   <div class="summary-divider"></div>
   <div class="summary-stat"><div class="num">5</div><div class="lbl">Regions</div></div>
   <div class="summary-divider"></div>
-  <div class="summary-stat"><div class="num">2</div><div class="lbl">Disney parks</div></div>
+  <div class="summary-stat"><div class="num">2</div><div class="lbl">Disney Parks</div></div>
   <div class="summary-divider"></div>
   <div class="summary-stat"><div class="num">4</div><div class="lbl">Flights</div></div>
   <div class="summary-divider"></div>
   <div class="summary-stat"><div class="num">7</div><div class="lbl">Hotels</div></div>
 </div>
-<div class="region-nav" id="regionNav">
+<div class="region-nav">
   <div class="region-pill" data-region="all" onclick="filterRegion('all')">All</div>
   <div class="region-pill" data-region="tokyo" onclick="filterRegion('tokyo')">Tokyo</div>
   <div class="region-pill" data-region="fuji" onclick="filterRegion('fuji')">Mt. Fuji</div>
@@ -110,18 +117,19 @@
   <div class="region-pill" data-region="osaka" onclick="filterRegion('osaka')">Osaka</div>
   <div class="region-pill" data-region="okinawa" onclick="filterRegion('okinawa')">Okinawa</div>
 </div>
-<div class="days-wrapper" id="daysWrapper"></div>
-<div class="footer">Built for Craig &amp; crew &nbsp;&middot;&nbsp; Japan May 2026 &nbsp;&middot;&nbsp; Changes save automatically in this browser</div>
+<div class="days-wrapper" id="daysWrapper"><div class="loading">Loading your trip...</div></div>
+<div class="footer">Craig &amp; crew &nbsp;&middot;&nbsp; Japan May 2026 &nbsp;&middot;&nbsp; Syncs to Google Sheets</div>
+
 <div class="modal-bg" id="modalBg">
   <div class="modal">
     <h3 id="modalTitle">Add activity</h3>
     <div class="field"><label>Activity name *</label><input id="fName" type="text" placeholder="e.g. Fushimi Inari Shrine"></div>
     <div class="field">
       <label>Time</label>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <input id="fTime" type="time" style="flex:1;">
-        <select id="fTimeLabel" style="flex:1;">
-          <option value="">-- or pick a label --</option>
+      <div class="time-row">
+        <input id="fTime" type="time">
+        <select id="fTimeLabel">
+          <option value="">or pick a label</option>
           <option value="Morning">Morning</option>
           <option value="Afternoon">Afternoon</option>
           <option value="Evening">Evening</option>
@@ -129,7 +137,7 @@
           <option value="All day">All day</option>
         </select>
       </div>
-      <div style="font-size:11px;color:var(--muted);margin-top:4px;">Pick a time OR choose a label. Time picker is used for sorting.</div>
+      <div class="field-hint">Pick a specific time OR a label. Specific times are used for sorting.</div>
     </div>
     <div class="field"><label>Category</label>
       <select id="fCat">
@@ -146,46 +154,152 @@
       </select>
     </div>
     <div class="field"><label>Address</label><input id="fAddr" type="text" placeholder="e.g. 68 Fushimiinari, Fushimi Ward, Kyoto"></div>
-    <div class="field"><label>Notes</label><textarea id="fNotes" placeholder="Tips, booking reminders, opening hours..."></textarea></div>
+    <div class="field"><label>Notes</label><textarea id="fNotes" placeholder="Tips, booking info, opening hours..."></textarea></div>
     <div class="modal-actions">
       <button class="mbtn danger" id="btnDelete" style="display:none;margin-right:auto" onclick="deleteActivity()">Delete</button>
       <button class="mbtn" onclick="closeModal()">Cancel</button>
-      <button class="mbtn primary" onclick="saveActivity()">Save</button>
+      <button class="mbtn primary" id="btnSave" onclick="saveActivity()">Save</button>
     </div>
   </div>
 </div>
 <div class="toast" id="toast"></div>
+
 <script>
-var STORAGE_KEY='japan2026_v2';
+var SCRIPT_URL='https://script.google.com/macros/s/AKfycbygz8sODpByrZ6H2xxPxVUimo4yxrXExyoWc-lIJtQlt0jspdpLKkwhz-2NJXDohfdO/exec';
 var regionColors={tokyo:'#2c3e50',fuji:'#4a6741',kyoto:'#6b4c3b',osaka:'#7d3c5c',okinawa:'#1a5276'};
 var badgeMap={transport:'badge-transport',hotel:'badge-hotel',sightseeing:'badge-sightseeing',food:'badge-food',activity:'badge-activity','theme-park':'badge-theme-park',nature:'badge-nature',shopping:'badge-shopping',beach:'badge-beach',rental:'badge-rental'};
 var labelMap={transport:'Transport',hotel:'Hotel',sightseeing:'Sightseeing',food:'Food',activity:'Activity','theme-park':'Theme Park',nature:'Nature',shopping:'Shopping',beach:'Beach',rental:'Car Rental'};
-var defaultDays=[
-{date:'Sat, May 3',label:'Departure Day',region:'tokyo',activities:[{id:'a1',time:'4:45 PM',cat:'transport',name:'Fly YVR \u2192 Tokyo (HND)',address:'Vancouver International Airport, YVR',notes:'ANA flight \u00b7 overnight flight, arrive next day evening'}]},
-{date:'Sun, May 4',label:'Arrive Tokyo',region:'tokyo',activities:[{id:'a2',time:'7:00 PM',cat:'transport',name:'Land at Haneda Airport (HND)',address:'Tokyo International Airport, Haneda',notes:'Clear customs & immigration, collect luggage'},{id:'a3',time:'Evening',cat:'transport',name:'Transfer to hotel',address:'Haneda \u2192 Blossom Hibiya',notes:'Taxi or Keikyu Line to Hibiya area (~40 min)'},{id:'a4',time:'Evening',cat:'hotel',name:'Check in \u00b7 Blossom Hibiya',address:'1-2-9 Uchisaiwaicho, Chiyoda City, Tokyo',notes:'Staying May 4\u20137 (3 nights)'}]},
-{date:'Mon, May 5',label:'Tokyo \u2014 Free Day',region:'tokyo',activities:[]},
-{date:'Tue, May 6',label:'Tokyo \u2014 Free Day',region:'tokyo',activities:[]},
-{date:'Wed, May 7',label:'Tokyo Disneyland',region:'tokyo',activities:[{id:'a5',time:'Morning',cat:'transport',name:'Check out \u00b7 Blossom Hibiya',address:'1-2-9 Uchisaiwaicho, Chiyoda City, Tokyo',notes:'Store luggage or arrange transfer to Maihama'},{id:'a6',time:'All day',cat:'theme-park',name:'Tokyo Disneyland',address:'1-1 Maihama, Urayasu, Chiba',notes:'\uD83C\uDFA2 Book FastPass / Premier Access in advance via the TDR app'},{id:'a7',time:'Evening',cat:'hotel',name:'Check in \u00b7 Hilton Tokyo Bay',address:'1-8 Maihama, Urayasu, Chiba',notes:'Connected to Disney resort \u2014 easy walk to parks'}]},
-{date:'Thu, May 8',label:'Tokyo DisneySea',region:'tokyo',activities:[{id:'a8',time:'All day',cat:'theme-park',name:'Tokyo DisneySea',address:'1-13 Maihama, Urayasu, Chiba',notes:'\uD83C\uDF0A Fantasy Springs area (new \u2014 very popular, book ahead)'},{id:'a9',time:'Evening',cat:'hotel',name:'Stay \u00b7 Hilton Tokyo Bay',address:'1-8 Maihama, Urayasu, Chiba',notes:'Night 2 at Hilton'}]},
-{date:'Fri, May 9',label:'Back to Central Tokyo',region:'tokyo',activities:[{id:'a10',time:'Morning',cat:'transport',name:'Check out \u00b7 Hilton Tokyo Bay',address:'1-8 Maihama, Urayasu, Chiba',notes:'Transfer back to central Tokyo'},{id:'a11',time:'Afternoon',cat:'hotel',name:'Check in \u00b7 Mitsui Garden Hotel Jingugaien',address:'2-1-1 Kasumigaokamachi, Shinjuku City, Tokyo',notes:'Near Shinjuku / Meiji area \u2014 great base for Shibuya & Harajuku'}]},
-{date:'Sat, May 10',label:'Mt. Fuji Day',region:'fuji',activities:[{id:'a12',time:'8\u20139 AM',cat:'transport',name:'Bus from Shibuya \u2192 Mt. Fuji area',address:'Shibuya Station Bus Terminal, Tokyo',notes:'Keio Highway Bus or Fujikyu \u2014 book in advance. ~2 hrs journey.'},{id:'a13',time:'Afternoon',cat:'nature',name:'Explore Kawaguchiko area',address:'Lake Kawaguchi, Fujikawaguchiko, Yamanashi',notes:'Lake views, Chureito Pagoda, Fuji panorama ropeway'},{id:'a14',time:'Evening',cat:'hotel',name:'Check in \u00b7 Fuji Kawaguchiko Onsen Hotel',address:'Kawaguchiko, Fujikawaguchiko, Yamanashi',notes:'\u2668\uFE0F Onsen hotel \u2014 try the baths in the evening with Fuji views'}]},
-{date:'Sun, May 11',label:'Mt. Fuji \u2192 Kyoto',region:'kyoto',activities:[{id:'a15',time:'Morning',cat:'transport',name:'Check out & travel to Kyoto',address:'Fuji Kawaguchiko \u2192 Kyoto',notes:'Bus to Mishima or Shin-Fuji \u00b7 Shinkansen to Kyoto Station \u00b7 Taxi to hotel (~3.5 hrs total)'},{id:'a16',time:'Afternoon',cat:'hotel',name:'Check in \u00b7 Cross Hotel Kyoto',address:'519 Karasuma-dori, Shijo-sagaru, Shimogyo-ku, Kyoto',notes:'Staying May 11\u201314 (3 nights) \u00b7 Great central Kyoto location'}]},
-{date:'Mon, May 12',label:'Kyoto \u2014 Free Day',region:'kyoto',activities:[]},
-{date:'Tue, May 13',label:'Kyoto \u2014 Free Day',region:'kyoto',activities:[]},
-{date:'Wed, May 14',label:'Kyoto \u2192 Osaka',region:'osaka',activities:[{id:'a17',time:'Morning',cat:'transport',name:'Check out \u00b7 Cross Hotel Kyoto',address:'519 Karasuma-dori, Shijo-sagaru, Shimogyo-ku, Kyoto',notes:''},{id:'a18',time:'Morning',cat:'transport',name:'Train: Kawaramachi \u2192 Umeda (Osaka)',address:'Hankyu Kyoto Line \u00b7 Kawaramachi Station, Kyoto',notes:'Hankyu Kyoto Line direct to Umeda Station (~45 min, ~\u00a5410). IC card accepted.'},{id:'a19',time:'Afternoon',cat:'sightseeing',name:'Explore Osaka / Dotonbori area',address:'Dotonbori, Namba, Osaka',notes:'Street food, neon lights, takoyaki, Glico running man sign'}]},
-{date:'Thu, May 15',label:'Osaka \u2192 Okinawa',region:'okinawa',activities:[{id:'a20',time:'Morning',cat:'transport',name:'Fly Osaka \u2192 Okinawa',address:'Kansai International Airport (KIX) or Itami (ITM)',notes:'Jetstar Japan GK 351 \u2014 confirm departure airport. Check in ~90 min early.'},{id:'a21',time:'Afternoon',cat:'rental',name:'Pick up rental car \u00b7 Budget/Avis',address:'Naha Airport, Okinawa',notes:'International Driving Permit required \u2014 get before leaving Canada.'},{id:'a22',time:'Afternoon',cat:'transport',name:'Drive to Manza Beach (~80 km north)',address:'Route 58 \u2192 Manza Beach, Onna Village, Okinawa',notes:'Scenic coastal drive ~1.5 hrs. Stop at American Village if time allows.'},{id:'a23',time:'Evening',cat:'hotel',name:'Check in \u00b7 ANA InterContinental Manza Beach Resort',address:'2260 Serakaki, Onna Village, Kunigami District, Okinawa',notes:'Staying May 15\u201318 (3 nights) \u00b7 Beachfront resort with pool & ocean views'}]},
-{date:'Fri, May 16',label:'Okinawa \u2014 Free Day',region:'okinawa',activities:[]},
-{date:'Sat, May 17',label:'Okinawa \u2014 Free Day',region:'okinawa',activities:[]},
-{date:'Sun, May 18',label:'Okinawa \u2192 Osaka \u2192 Tokyo',region:'okinawa',activities:[{id:'a24',time:'Morning',cat:'transport',name:'Check out \u00b7 Drive to Naha Airport',address:'ANA InterContinental Manza Beach \u2192 Naha Airport',notes:'Allow ~1.5 hrs drive + return rental car (~30 min before flight)'},{id:'a25',time:'Afternoon',cat:'transport',name:'Fly Okinawa \u2192 Osaka',address:'Naha Airport (OKA) \u2192 Kansai/Itami',notes:'Jetstar Japan GK 352 \u2014 confirm arrival airport for onward train to Tokyo'},{id:'a26',time:'Evening',cat:'transport',name:'Shinkansen: Osaka \u2192 Tokyo',address:'Shin-Osaka Station \u2192 Tokyo Station',notes:'Nozomi ~2.5 hrs. Book seat in advance if using JR Pass.'},{id:'a27',time:'Night',cat:'hotel',name:'Check in \u00b7 Mitsui Garden Hotel Jingugaien',address:'2-1-1 Kasumigaokamachi, Shinjuku City, Tokyo',notes:'Return stay \u2014 same hotel as May 9'}]},
-{date:'Mon, May 19',label:'Fly Home',region:'tokyo',activities:[{id:'a28',time:'9:55 PM',cat:'transport',name:'Fly HND \u2192 Vancouver (YVR)',address:'Haneda Airport (HND), Tokyo',notes:'ANA NH 116 \u00b7 Arrives YVR 2:50 PM same day (cross date line)'}]}
+
+var DAY_META=[
+  {date:'Sat, May 3',label:'Departure Day',region:'tokyo'},
+  {date:'Sun, May 4',label:'Arrive Tokyo',region:'tokyo'},
+  {date:'Mon, May 5',label:'Tokyo - Free Day',region:'tokyo'},
+  {date:'Tue, May 6',label:'Tokyo - Free Day',region:'tokyo'},
+  {date:'Wed, May 7',label:'Tokyo Disneyland',region:'tokyo'},
+  {date:'Thu, May 8',label:'Tokyo DisneySea',region:'tokyo'},
+  {date:'Fri, May 9',label:'Back to Central Tokyo',region:'tokyo'},
+  {date:'Sat, May 10',label:'Mt. Fuji Day',region:'fuji'},
+  {date:'Sun, May 11',label:'Mt. Fuji to Kyoto',region:'kyoto'},
+  {date:'Mon, May 12',label:'Kyoto - Free Day',region:'kyoto'},
+  {date:'Tue, May 13',label:'Kyoto - Free Day',region:'kyoto'},
+  {date:'Wed, May 14',label:'Kyoto to Osaka',region:'osaka'},
+  {date:'Thu, May 15',label:'Osaka to Okinawa',region:'okinawa'},
+  {date:'Fri, May 16',label:'Okinawa - Free Day',region:'okinawa'},
+  {date:'Sat, May 17',label:'Okinawa - Free Day',region:'okinawa'},
+  {date:'Sun, May 18',label:'Okinawa to Osaka to Tokyo',region:'okinawa'},
+  {date:'Mon, May 19',label:'Fly Home',region:'tokyo'}
 ];
-function loadData(){try{var s=localStorage.getItem(STORAGE_KEY);if(s)return JSON.parse(s);}catch(e){}return JSON.parse(JSON.stringify(defaultDays));}
-function saveData(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(days));}catch(e){}}
-var days=loadData();var _uid=200;
+
+var DEFAULT_ROWS=[
+  [0,'a1','16:45','transport','Fly YVR to Tokyo (HND)','Vancouver International Airport, YVR','ANA flight - overnight flight, arrive next day evening'],
+  [1,'a2','19:00','transport','Land at Haneda Airport (HND)','Tokyo International Airport, Haneda','Clear customs and immigration, collect luggage'],
+  [1,'a3','20:00','transport','Transfer to hotel','Haneda to Blossom Hibiya','Taxi or Keikyu Line to Hibiya area (~40 min)'],
+  [1,'a4','Evening','hotel','Check in - Blossom Hibiya','1-2-9 Uchisaiwaicho, Chiyoda City, Tokyo','Staying May 4-7 (3 nights)'],
+  [4,'a5','Morning','transport','Check out - Blossom Hibiya','1-2-9 Uchisaiwaicho, Chiyoda City, Tokyo','Store luggage or arrange transfer to Maihama'],
+  [4,'a6','All day','theme-park','Tokyo Disneyland','1-1 Maihama, Urayasu, Chiba','Book FastPass / Premier Access in advance via the TDR app'],
+  [4,'a7','Evening','hotel','Check in - Hilton Tokyo Bay','1-8 Maihama, Urayasu, Chiba','Connected to Disney resort - easy walk to parks'],
+  [5,'a8','All day','theme-park','Tokyo DisneySea','1-13 Maihama, Urayasu, Chiba','Fantasy Springs area (new - very popular, book ahead)'],
+  [5,'a9','Evening','hotel','Stay - Hilton Tokyo Bay','1-8 Maihama, Urayasu, Chiba','Night 2 at Hilton'],
+  [6,'a10','Morning','transport','Check out - Hilton Tokyo Bay','1-8 Maihama, Urayasu, Chiba','Transfer back to central Tokyo'],
+  [6,'a11','Afternoon','hotel','Check in - Mitsui Garden Hotel Jingugaien','2-1-1 Kasumigaokamachi, Shinjuku City, Tokyo','Near Shinjuku / Meiji area - great base for Shibuya and Harajuku'],
+  [7,'a12','08:30','transport','Bus from Shibuya to Mt. Fuji area','Shibuya Station Bus Terminal, Tokyo','Keio Highway Bus or Fujikyu - book in advance. ~2 hrs journey.'],
+  [7,'a13','Afternoon','nature','Explore Kawaguchiko area','Lake Kawaguchi, Fujikawaguchiko, Yamanashi','Lake views, Chureito Pagoda, Fuji panorama ropeway'],
+  [7,'a14','Evening','hotel','Check in - Fuji Kawaguchiko Onsen Hotel','Kawaguchiko, Fujikawaguchiko, Yamanashi','Onsen hotel - try the baths in the evening with Fuji views'],
+  [8,'a15','Morning','transport','Check out and travel to Kyoto','Fuji Kawaguchiko to Kyoto','Bus to Mishima or Shin-Fuji, Shinkansen to Kyoto Station, Taxi to hotel (~3.5 hrs total)'],
+  [8,'a16','Afternoon','hotel','Check in - Cross Hotel Kyoto','519 Karasuma-dori, Shijo-sagaru, Shimogyo-ku, Kyoto','Staying May 11-14 (3 nights) - Great central Kyoto location'],
+  [11,'a17','Morning','transport','Check out - Cross Hotel Kyoto','519 Karasuma-dori, Shijo-sagaru, Shimogyo-ku, Kyoto',''],
+  [11,'a18','Morning','transport','Train: Kawaramachi to Umeda (Osaka)','Hankyu Kyoto Line, Kawaramachi Station, Kyoto','Hankyu Kyoto Line direct to Umeda Station (~45 min, ~410 yen). IC card accepted.'],
+  [11,'a19','Afternoon','sightseeing','Explore Osaka / Dotonbori area','Dotonbori, Namba, Osaka','Street food, neon lights, takoyaki, Glico running man sign'],
+  [12,'a20','Morning','transport','Fly Osaka to Okinawa','Kansai International Airport (KIX) or Itami (ITM)','Jetstar Japan GK 351 - confirm departure airport. Check in ~90 min early.'],
+  [12,'a21','Afternoon','rental','Pick up rental car - Budget/Avis','Naha Airport, Okinawa','International Driving Permit required - get from CAA before leaving Canada.'],
+  [12,'a22','Afternoon','transport','Drive to Manza Beach (~80 km north)','Route 58, Manza Beach, Onna Village, Okinawa','Scenic coastal drive ~1.5 hrs. Stop at American Village in Chatan if time allows.'],
+  [12,'a23','Evening','hotel','Check in - ANA InterContinental Manza Beach Resort','2260 Serakaki, Onna Village, Kunigami District, Okinawa','Staying May 15-18 (3 nights) - Beachfront resort with pool and ocean views'],
+  [15,'a24','Morning','transport','Check out and drive to Naha Airport','ANA InterContinental Manza Beach to Naha Airport','Allow ~1.5 hrs drive + return rental car (~30 min before flight)'],
+  [15,'a25','Afternoon','transport','Fly Okinawa to Osaka','Naha Airport (OKA) to Kansai/Itami','Jetstar Japan GK 352 - confirm arrival airport for onward train to Tokyo'],
+  [15,'a26','Evening','transport','Shinkansen: Osaka to Tokyo','Shin-Osaka Station to Tokyo Station','Nozomi ~2.5 hrs. Book seat in advance if using JR Pass.'],
+  [15,'a27','Night','hotel','Check in - Mitsui Garden Hotel Jingugaien','2-1-1 Kasumigaokamachi, Shinjuku City, Tokyo','Return stay - same hotel as May 9'],
+  [16,'a28','21:55','transport','Fly HND to Vancouver (YVR)','Haneda Airport (HND), Tokyo','ANA NH 116 - Arrives YVR 2:50 PM same day']
+];
+
+var days=[];
+var modalDayIdx=null,modalActIdx=null,modalMode='add';
+var _uid=500;
 function uid(){return 'u'+(++_uid)+'_'+Date.now();}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function formatDisplayTime(t){
+  if(!t)return '';
+  var m=t.match(/^(\d{1,2}):(\d{2})$/);
+  if(!m)return t;
+  var h=parseInt(m[1]),mn=m[2],ap=h>=12?'PM':'AM';
+  h=h%12||12;
+  return h+':'+mn+' '+ap;
+}
+function getSortKey(t){
+  if(!t)return 9999;
+  var m=t.match(/^(\d{1,2}):(\d{2})$/);
+  if(m)return parseInt(m[1])*60+parseInt(m[2]);
+  var lbl={Morning:480,Afternoon:720,Evening:1080,Night:1260,'All day':0};
+  return lbl[t]!==undefined?lbl[t]:9998;
+}
+function sortActs(acts){return acts.slice().sort(function(a,b){return getSortKey(a.time)-getSortKey(b.time);});}
+
+function rowsTodays(rows){
+  var d=DAY_META.map(function(m){return {date:m.date,label:m.label,region:m.region,activities:[]};});
+  var data=(rows.length>1)?rows.slice(1):DEFAULT_ROWS;
+  data.forEach(function(r){
+    var di=parseInt(r[0]);
+    if(!isNaN(di)&&d[di]){
+      d[di].activities.push({id:String(r[1]||uid()),time:String(r[2]||''),cat:String(r[3]||'sightseeing'),name:String(r[4]||''),address:String(r[5]||''),notes:String(r[6]||'')});
+    }
+  });
+  d.forEach(function(day){day.activities=sortActs(day.activities);});
+  return d;
+}
+function daysToRows(){
+  var rows=[['dayIndex','id','time','cat','name','address','notes']];
+  days.forEach(function(day,di){
+    day.activities.forEach(function(a){
+      rows.push([di,a.id||'',a.time||'',a.cat||'',a.name||'',a.address||'',a.notes||'']);
+    });
+  });
+  return rows;
+}
+
+function showSync(msg,autohide){
+  var el=document.getElementById('syncBar');
+  el.textContent=msg;el.classList.add('show');
+  if(autohide)setTimeout(function(){el.classList.remove('show');},2000);
+}
+function hideSync(){document.getElementById('syncBar').classList.remove('show');}
+
+function loadFromSheet(){
+  showSync('Loading your trip...');
+  fetch(SCRIPT_URL)
+    .then(function(r){return r.json();})
+    .then(function(rows){
+      days=rowsTodays(rows);
+      hideSync();
+      buildDays();
+    })
+    .catch(function(){
+      days=rowsTodays([]);
+      hideSync();
+      buildDays();
+      showToast('Loaded offline mode');
+    });
+}
+
+function saveToSheet(){
+  showSync('Saving...');
+  fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify(daysToRows())})
+    .then(function(){showSync('Saved!',true);})
+    .catch(function(){showSync('Save failed - check connection',true);});
+}
+
 function buildDays(){
-  var wrapper=document.getElementById('daysWrapper');wrapper.innerHTML='';
+  var wrapper=document.getElementById('daysWrapper');
+  wrapper.innerHTML='';
   days.forEach(function(day,i){
     var col=regionColors[day.region]||'#333';
     var acts=day.activities||[];
@@ -193,31 +307,41 @@ function buildDays(){
     card.className='day-card'+(acts.length>0||i<2?' open':'');
     card.dataset.region=day.region;
     var actsHTML='';
-    if(acts.length===0){actsHTML='<div class="empty-day">Free day &mdash; tap &ldquo;+ Add activity&rdquo; to fill this in</div>';}
-    else{acts.forEach(function(a,ai){
-      var isLast=ai===acts.length-1;
-      actsHTML+='<div class="activity-row">'+
-        '<div class="act-time-col">'+esc(formatDisplayTime(a.time||''))+'</div>'+
-        '<div class="act-dot-col"><div class="act-dot" style="background:'+col+'"></div>'+((!isLast)?'<div class="act-line"></div>':'')+'</div>'+
-        '<div class="act-content">'+
-          '<span class="act-cat-badge '+(badgeMap[a.cat]||'badge-activity')+'">'+( labelMap[a.cat]||a.cat)+'</span>'+
-          '<div class="act-name">'+esc(a.name)+'</div>'+
-          (a.address?'<div class="act-address">'+esc(a.address)+'</div>':'')+
-          (a.notes?'<div class="act-notes">'+esc(a.notes)+'</div>':'')+
-        '</div>'+
-        '<div class="act-actions">'+
-          '<button class="act-btn" onclick="openEdit('+i+','+ai+')">Edit</button>'+
-          '<button class="act-btn del" onclick="quickDelete('+i+','+ai+')">Delete</button>'+
-        '</div>'+
-      '</div>';
-    });}
+    if(acts.length===0){
+      actsHTML='<div class="empty-day">Free day — tap "+ Add activity" to fill this in</div>';
+    } else {
+      acts.forEach(function(a,ai){
+        var isLast=ai===acts.length-1;
+        actsHTML+=
+          '<div class="activity-row">'+
+            '<div class="act-time-col">'+esc(formatDisplayTime(a.time||''))+'</div>'+
+            '<div class="act-dot-col">'+
+              '<div class="act-dot" style="background:'+col+'"></div>'+
+              (isLast?'':'<div class="act-line"></div>')+
+            '</div>'+
+            '<div class="act-content">'+
+              '<span class="act-cat-badge '+(badgeMap[a.cat]||'badge-activity')+'">'+(labelMap[a.cat]||a.cat)+'</span>'+
+              '<div class="act-name">'+esc(a.name)+'</div>'+
+              (a.address?'<div class="act-address">'+esc(a.address)+'</div>':'')+
+              (a.notes?'<div class="act-notes">'+esc(a.notes)+'</div>':'')+
+            '</div>'+
+            '<div class="act-actions">'+
+              '<button class="act-btn" onclick="openEdit('+i+','+ai+')">Edit</button>'+
+              '<button class="act-btn del" onclick="quickDelete('+i+','+ai+')">Delete</button>'+
+            '</div>'+
+          '</div>';
+      });
+    }
     card.innerHTML=
       '<div class="day-header" onclick="toggleDay('+i+')">'+
         '<div class="day-color-bar" style="background:'+col+'"></div>'+
         '<div class="day-header-inner">'+
           '<div class="day-left">'+
             '<div class="day-num">'+(i+1)+'</div>'+
-            '<div><div class="day-date">'+esc(day.date)+'</div><div class="day-location">'+esc(day.label)+'</div></div>'+
+            '<div>'+
+              '<div class="day-date">'+esc(day.date)+'</div>'+
+              '<div class="day-location">'+esc(day.label)+'</div>'+
+            '</div>'+
           '</div>'+
           '<div class="day-right">'+
             '<span class="day-count">'+(acts.length>0?acts.length+' item'+(acts.length!==1?'s':''):'Free')+'</span>'+
@@ -232,7 +356,8 @@ function buildDays(){
   });
   applyRegionFilter();
 }
-function toggleDay(i){var cards=document.querySelectorAll('.day-card');cards[i].classList.toggle('open');}
+
+function toggleDay(i){document.querySelectorAll('.day-card')[i].classList.toggle('open');}
 var activeRegion='all';
 function filterRegion(r){
   activeRegion=r;
@@ -243,92 +368,99 @@ function filterRegion(r){
   applyRegionFilter();
 }
 function applyRegionFilter(){
-  document.querySelectorAll('.day-card').forEach(function(card){
-    card.classList.toggle('hidden',activeRegion!=='all'&&card.dataset.region!==activeRegion);
+  document.querySelectorAll('.day-card').forEach(function(c){
+    c.classList.toggle('hidden',activeRegion!=='all'&&c.dataset.region!==activeRegion);
   });
 }
-var modalDayIdx=null,modalActIdx=null,modalMode='add';
+
+function getTimeVal(){
+  var t=document.getElementById('fTime').value.trim();
+  var l=document.getElementById('fTimeLabel').value;
+  return t?t:(l||'');
+}
+
 function openAdd(dayIdx){
   modalDayIdx=dayIdx;modalActIdx=null;modalMode='add';
-  document.getElementById('modalTitle').textContent='Add activity \u2014 '+days[dayIdx].date;
-  document.getElementById('fName').value='';document.getElementById('fTime').value='';
+  document.getElementById('modalTitle').textContent='Add activity - '+days[dayIdx].date;
+  document.getElementById('fName').value='';
+  document.getElementById('fTime').value='';
   document.getElementById('fTimeLabel').value='';
-  document.getElementById('fCat').value='sightseeing';document.getElementById('fAddr').value='';document.getElementById('fNotes').value='';
+  document.getElementById('fCat').value='sightseeing';
+  document.getElementById('fAddr').value='';
+  document.getElementById('fNotes').value='';
   document.getElementById('btnDelete').style.display='none';
+  document.getElementById('btnSave').textContent='Save';
   document.getElementById('modalBg').classList.add('open');
   setTimeout(function(){document.getElementById('fName').focus();},80);
 }
+
 function openEdit(dayIdx,actIdx){
   modalDayIdx=dayIdx;modalActIdx=actIdx;modalMode='edit';
   var a=days[dayIdx].activities[actIdx];
   document.getElementById('modalTitle').textContent='Edit activity';
   document.getElementById('fName').value=a.name||'';
   var t=a.time||'';
-  var isRaw=t.match(/^\d{2}:\d{2}$/);
+  var isRaw=/^\d{1,2}:\d{2}$/.test(t);
   document.getElementById('fTime').value=isRaw?t:'';
   document.getElementById('fTimeLabel').value=(!isRaw&&t)?t:'';
-  document.getElementById('fCat').value=a.cat||'sightseeing';document.getElementById('fAddr').value=a.address||'';document.getElementById('fNotes').value=a.notes||'';
+  document.getElementById('fCat').value=a.cat||'sightseeing';
+  document.getElementById('fAddr').value=a.address||'';
+  document.getElementById('fNotes').value=a.notes||'';
   document.getElementById('btnDelete').style.display='inline-block';
+  document.getElementById('btnSave').textContent='Save';
   document.getElementById('modalBg').classList.add('open');
   setTimeout(function(){document.getElementById('fName').focus();},80);
 }
+
 function closeModal(){document.getElementById('modalBg').classList.remove('open');}
-function getTimeValue(){
-  var t=document.getElementById('fTime').value.trim();
-  var l=document.getElementById('fTimeLabel').value;
-  if(t) return t; // "HH:MM" 24h format
-  if(l) return l;
-  return '';
-}
-function formatDisplayTime(t){
-  if(!t) return '';
-  // Convert 24h "HH:MM" to 12h display
-  var m=t.match(/^(\d{2}):(\d{2})$/);
-  if(!m) return t;
-  var h=parseInt(m[1]),min=m[2],ampm=h>=12?'PM':'AM';
-  h=h%12||12;
-  return h+':'+min+' '+ampm;
-}
-function getSortKey(t){
-  if(!t) return 9999;
-  var m=t.match(/^(\d{2}):(\d{2})$/);
-  if(m) return parseInt(m[1])*60+parseInt(m[2]);
-  var labels={Morning:480,Afternoon:720,Evening:1080,Night:1260,'All day':0};
-  return labels[t]!==undefined?labels[t]:9998;
-}
-function sortActivities(acts){
-  return acts.slice().sort(function(a,b){return getSortKey(a.time)-getSortKey(b.time);});
-}
+
 function saveActivity(){
   var name=document.getElementById('fName').value.trim();
   if(!name){document.getElementById('fName').focus();return;}
-  var timeVal=getTimeValue();
-  var act={id:uid(),name:name,time:timeVal,cat:document.getElementById('fCat').value,address:document.getElementById('fAddr').value.trim(),notes:document.getElementById('fNotes').value.trim()};
+  document.getElementById('btnSave').textContent='Saving...';
   var savedIdx=modalDayIdx;
-  if(modalMode==='add'){days[modalDayIdx].activities.push(act);}
-  else{act.id=days[modalDayIdx].activities[modalActIdx].id;days[modalDayIdx].activities[modalActIdx]=act;}
-  days[modalDayIdx].activities=sortActivities(days[modalDayIdx].activities);
-  showToast(modalMode==='add'?'Activity added':'Activity saved');
-  saveData();closeModal();buildDays();
+  var act={id:uid(),name:name,time:getTimeVal(),cat:document.getElementById('fCat').value,address:document.getElementById('fAddr').value.trim(),notes:document.getElementById('fNotes').value.trim()};
+  if(modalMode==='add'){
+    days[modalDayIdx].activities.push(act);
+  } else {
+    act.id=days[modalDayIdx].activities[modalActIdx].id;
+    days[modalDayIdx].activities[modalActIdx]=act;
+  }
+  days[modalDayIdx].activities=sortActs(days[modalDayIdx].activities);
+  closeModal();buildDays();
   setTimeout(function(){var c=document.querySelectorAll('.day-card');if(c[savedIdx])c[savedIdx].classList.add('open');},20);
+  saveToSheet();
+  showToast(modalMode==='add'?'Activity added':'Activity saved');
 }
+
 function deleteActivity(){
   var savedIdx=modalDayIdx;
   days[modalDayIdx].activities.splice(modalActIdx,1);
-  saveData();closeModal();buildDays();showToast('Activity deleted');
+  closeModal();buildDays();
   setTimeout(function(){var c=document.querySelectorAll('.day-card');if(c[savedIdx])c[savedIdx].classList.add('open');},20);
+  saveToSheet();
+  showToast('Deleted');
 }
+
 function quickDelete(dayIdx,actIdx){
   if(!confirm('Delete this activity?'))return;
   days[dayIdx].activities.splice(actIdx,1);
-  saveData();buildDays();showToast('Activity deleted');
+  buildDays();
   setTimeout(function(){var c=document.querySelectorAll('.day-card');if(c[dayIdx])c[dayIdx].classList.add('open');},20);
+  saveToSheet();
+  showToast('Deleted');
 }
-function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2200);}
+
+function showToast(msg){
+  var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},2200);
+}
+
 document.getElementById('modalBg').addEventListener('click',function(e){if(e.target===this)closeModal();});
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal();});
 document.getElementById('fName').addEventListener('keydown',function(e){if(e.key==='Enter')saveActivity();});
-buildDays();
+
+loadFromSheet();
 </script>
 </body>
 </html>
