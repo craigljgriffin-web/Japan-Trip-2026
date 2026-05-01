@@ -440,43 +440,107 @@ function closeModal(){document.getElementById('modalBg').classList.remove('open'
 function saveActivity(){var name=document.getElementById('fName').value.trim();if(!name){document.getElementById('fName').focus();return;}document.getElementById('btnSave').textContent='Saving...';var si=modalDayIdx;var act={id:uid(),name:name,time:getTV(),cat:document.getElementById('fCat').value,address:document.getElementById('fAddr').value.trim(),notes:document.getElementById('fNotes').value.trim()};if(modalMode==='add'){days[si].activities.push(act);}else{act.id=days[si].activities[modalActIdx].id;days[si].activities[modalActIdx]=act;}days[si].activities=sortA(days[si].activities);closeModal();buildDays();setTimeout(function(){var c=document.querySelectorAll('.day-card');if(c[si])c[si].classList.add('open');},20);saveToSheet();showToast(modalMode==='add'?'Added!':'Saved!');}
 function deleteActivity(){var si=modalDayIdx;days[si].activities.splice(modalActIdx,1);closeModal();buildDays();setTimeout(function(){var c=document.querySelectorAll('.day-card');if(c[si])c[si].classList.add('open');},20);saveToSheet();showToast('Deleted');}
 function qDel(di,ai){if(!confirm('Delete?'))return;days[di].activities.splice(ai,1);buildDays();setTimeout(function(){var c=document.querySelectorAll('.day-card');if(c[di])c[di].classList.add('open');},20);saveToSheet();showToast('Deleted');}
-var COORDS={Vancouver:{lat:49.28,lon:-123.12},Tokyo:{lat:35.68,lon:139.69},Fujikawaguchiko:{lat:35.50,lon:138.75},Kyoto:{lat:35.01,lon:135.77},Osaka:{lat:34.69,lon:135.50},Okinawa:{lat:26.21,lon:127.68}};
-function wdesc(c){if(c===0)return 'Clear sky';if(c<=2)return 'Partly cloudy';if(c===3)return 'Overcast';if(c<=49)return 'Foggy';if(c<=59)return 'Drizzle';if(c<=69)return 'Rain';if(c<=79)return 'Snow';if(c<=99)return 'Thunderstorm';return 'Unknown';}
-function wicon(c){if(c===0)return '&#9728;';if(c<=2)return '&#9925;';if(c===3)return '&#9729;';if(c<=49)return '&#127787;';if(c<=59)return '&#127782;';if(c<=69)return '&#127783;';if(c<=79)return '&#10052;';if(c<=99)return '&#9928;';return '&#127777;';}
-function getTodayCity(){var today=new Date();var start=new Date('2026-05-03');var diff=Math.floor((today-start)/86400000);if(diff<0||diff>=DAY_META.length)return null;return DAY_META[diff];}
+/* ==================== WEATHER ==================== */
+var TRIP_CITIES = [
+  {city:'Tokyo',     dates:'May 4 – 9',   lat:35.68, lon:139.69, startDay:1,  days:6},
+  {city:'Mt. Fuji',  dates:'May 10',       lat:35.50, lon:138.75, startDay:7,  days:1},
+  {city:'Kyoto',     dates:'May 11 – 13',  lat:35.01, lon:135.77, startDay:8,  days:3},
+  {city:'Osaka',     dates:'May 14',       lat:34.69, lon:135.50, startDay:11, days:1},
+  {city:'Okinawa',   dates:'May 15 – 18',  lat:26.21, lon:127.68, startDay:12, days:4},
+  {city:'Tokyo',     dates:'May 18 – 19',  lat:35.68, lon:139.69, startDay:15, days:2}
+];
+
+function wdesc(c){if(c===0)return 'Clear sky';if(c<=2)return 'Partly cloudy';if(c===3)return 'Overcast';if(c<=49)return 'Foggy';if(c<=59)return 'Drizzle';if(c<=69)return 'Rain';if(c<=79)return 'Snow';if(c<=99)return 'Thunderstorm';return 'Clear';}
+function wicon(c){if(c===0)return '&#9728;';if(c<=2)return '&#9925;';if(c===3)return '&#9729;';if(c<=49)return '&#127787;';if(c<=59)return '&#127782;';if(c<=69)return '&#127783;';if(c<=79)return '&#10052;';if(c<=99)return '&#9928;';return '&#9728;';}
+
 function loadWeather(){
-  var con=document.getElementById('weatherContent');
-  var meta=getTodayCity();
-  var city=meta?meta.city:'Tokyo';
-  var btns='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:1rem;">';
-  Object.keys(COORDS).forEach(function(c){if(c!=='Vancouver')btns+='<button class="qbtn" onclick="loadWeatherCity(\"'+c+'\")">'+c+'</button>';});
-  btns+='</div>';
-  if(!meta){con.innerHTML='<div class="card"><p style="font-size:13px;color:var(--muted)">Weather will auto-show your trip city from May 3. Browse cities below:</p>'+btns+'</div><div id="wcontent"><div class="loading">Loading Tokyo...</div></div>';setTimeout(function(){loadWeatherCity('Tokyo');},50);return;}
-  con.innerHTML='<div class="card"><p style="font-size:13px;color:var(--muted)">Today you are in <strong>'+city+'</strong> ('+meta.date+')</p>'+btns+'</div><div id="wcontent"><div class="loading">Loading...</div></div>';
-  setTimeout(function(){loadWeatherCity(city);},50);
-}
-function loadWeatherCity(city){
-  var c=COORDS[city];if(!c)return;
-  var wc=document.getElementById('wcontent');if(wc)wc.innerHTML='<div class="loading">Loading '+city+'...</div>';
-  fetch('https://api.open-meteo.com/v1/forecast?latitude='+c.lat+'&longitude='+c.lon+'&current=temperature_2m,weathercode,windspeed_10m,relative_humidity_2m&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=3')
-    .then(function(r){return r.json();})
-    .then(function(data){
-      var cur=data.current;var daily=data.daily;
-      var html='<div class="card"><div class="card-title">'+city+' - Now</div>'+
-        '<div class="weather-main"><div class="w-icon">'+wicon(cur.weathercode)+'</div>'+
-        '<div><div class="w-temp">'+Math.round(cur.temperature_2m)+'&deg;C</div><div class="w-desc">'+wdesc(cur.weathercode)+'</div></div></div>'+
-        '<div class="w-details"><div class="w-detail">Humidity <span>'+cur.relative_humidity_2m+'%</span></div>'+
-        '<div class="w-detail">Wind <span>'+Math.round(cur.windspeed_10m)+' km/h</span></div>'+
-        '<div class="w-detail">Rain <span>'+(daily.precipitation_probability_max[0]||0)+'%</span></div></div></div>'+
-        '<div class="card"><div class="card-title">3-Day Forecast</div>';
-      ['Today','Tomorrow','Day 3'].forEach(function(label,i){
-        html+='<div class="info-row"><span class="info-label">'+label+'</span><span class="info-value">'+Math.round(daily.temperature_2m_min[i])+'&deg; &ndash; '+Math.round(daily.temperature_2m_max[i])+'&deg;C &nbsp;&bull;&nbsp; Rain '+(daily.precipitation_probability_max[i]||0)+'%</span></div>';
+  var con = document.getElementById('weatherContent');
+  if(!con) return;
+  con.innerHTML = '<div class="loading">Loading forecasts...</div>';
+
+  // Fetch weather for each unique city
+  var fetched = {};
+  var pending = 0;
+  var results = {};
+
+  TRIP_CITIES.forEach(function(tc) {
+    var key = tc.city;
+    if(fetched[key]) return;
+    fetched[key] = true;
+    pending++;
+    var url = 'https://api.open-meteo.com/v1/forecast?latitude='+tc.lat+'&longitude='+tc.lon+
+      '&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weathercode'+
+      '&timezone=auto&forecast_days=16&start_date=2026-05-01&end_date=2026-05-19';
+    fetch(url)
+      .then(function(r){return r.json();})
+      .then(function(data){
+        results[key] = data.daily;
+        pending--;
+        if(pending===0) renderWeather(con, results);
+      })
+      .catch(function(){
+        results[key] = null;
+        pending--;
+        if(pending===0) renderWeather(con, results);
       });
-      html+='</div>';
-      if(wc)wc.innerHTML=html;
-    })
-    .catch(function(){if(wc)wc.innerHTML='<div class="card"><p style="color:var(--muted);font-size:13px">Could not load weather. Check connection.</p></div>';});
+  });
 }
+
+function renderWeather(con, results) {
+  var html = '';
+  // Day names for May 2026
+  var MAY_DAYS = ['','Fri','Sat','Sun','Mon','Tue','Wed','Thu','Fri','Sat','Sun','Mon','Tue','Wed','Thu','Fri','Sat','Sun','Mon','Mon'];
+  var MAY_DATES = ['','May 1','May 2','May 3','May 4','May 5','May 6','May 7','May 8','May 9','May 10','May 11','May 12','May 13','May 14','May 15','May 16','May 17','May 18','May 19'];
+
+  TRIP_CITIES.forEach(function(tc) {
+    var daily = results[tc.city];
+    html += '<div class="card" style="margin-bottom:12px;">';
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">';
+    html += '<div><div style="font-size:15px;font-weight:500;">'+tc.city+'</div>';
+    html += '<div style="font-size:12px;color:var(--muted);">'+tc.dates+'</div></div>';
+    html += '</div>';
+
+    if(!daily){
+      html += '<div style="font-size:13px;color:var(--muted);font-style:italic;">Forecast unavailable — check closer to departure</div>';
+      html += '</div>';
+      return;
+    }
+
+    // Show one row per day we are there
+    for(var d = 0; d < tc.days; d++){
+      var mayDay = tc.startDay + d; // index into May (1=May1, 4=May4 etc)
+      // Find the index in the API response dates array
+      var dateStr = '2026-05-' + String(mayDay < 10 ? '0'+mayDay : mayDay);
+      var di = daily.time ? daily.time.indexOf(dateStr) : -1;
+
+      html += '<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);">';
+      html += '<div style="width:80px;flex-shrink:0;"><div style="font-size:12px;font-weight:500;">'+MAY_DATES[mayDay]+'</div>';
+      html += '<div style="font-size:11px;color:var(--muted);">'+MAY_DAYS[mayDay]+'</div></div>';
+
+      if(di < 0){
+        html += '<div style="font-size:12px;color:var(--muted);">Forecast not yet available</div>';
+      } else {
+        var code = daily.weathercode[di];
+        var hi = Math.round(daily.temperature_2m_max[di]);
+        var lo = Math.round(daily.temperature_2m_min[di]);
+        var rain = daily.precipitation_probability_max[di] || 0;
+        html += '<div style="font-size:20px;width:30px;">'+wicon(code)+'</div>';
+        html += '<div style="flex:1;">';
+        html += '<div style="font-size:13px;">'+wdesc(code)+'</div>';
+        html += '<div style="font-size:12px;color:var(--muted);">'+lo+'° – '+hi+'°C &nbsp;·&nbsp; Rain '+rain+'%</div>';
+        html += '</div>';
+      }
+      html += '</div>';
+    }
+    html += '</div>';
+  });
+
+  if(!html){
+    html = '<div class="card"><p style="color:var(--muted);font-size:13px;">Could not load forecasts. Try again closer to your trip.</p></div>';
+  }
+  con.innerHTML = html;
+}
+
 function loadRate(){fetch('https://api.frankfurter.app/latest?from=CAD&to=JPY').then(function(r){return r.json();}).then(function(d){cadRate=d.rates.JPY;document.getElementById('rateDisplay').textContent='1 CAD = '+cadRate.toFixed(2)+' JPY (live rate)';}).catch(function(){document.getElementById('rateDisplay').textContent='1 CAD = ~109 JPY (estimate)';});}
 function cad2yen(){var v=parseFloat(document.getElementById('cadInput').value);if(!isNaN(v))document.getElementById('yenInput').value=Math.round(v*cadRate);else document.getElementById('yenInput').value='';}
 function yen2cad(){var v=parseFloat(document.getElementById('yenInput').value);if(!isNaN(v))document.getElementById('cadInput').value=(v/cadRate).toFixed(2);else document.getElementById('cadInput').value='';}
