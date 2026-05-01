@@ -470,7 +470,7 @@ function loadWeather(){
     pending++;
     var url = 'https://api.open-meteo.com/v1/forecast?latitude='+tc.lat+'&longitude='+tc.lon+
       '&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weathercode'+
-      '&timezone=auto&forecast_days=16&start_date=2026-05-01&end_date=2026-05-19';
+      '&timezone=auto&forecast_days=16';
     fetch(url)
       .then(function(r){return r.json();})
       .then(function(data){
