@@ -592,7 +592,9 @@ var RESTAURANTS_DEFAULT=[
   {id:'r4',name:'Maruzen',city:'Tokyo',type:'Cafe/Other',notes:'',day:''},
   {id:'r5',name:'Tsukiji Outer Market',city:'Tokyo',type:'Street Food',notes:'Best in the morning for fresh seafood',day:''},
   {id:'r6',name:'Dotonbori Street Food',city:'Osaka',type:'Street Food',notes:'Takoyaki, okonomiyaki, kushikatsu',day:''},
-  {id:'r7',name:'Pontocho Alley restaurant',city:'Kyoto',type:'Izakaya',notes:'Riverside dining - pick one that looks good',day:''}
+  {id:'r7',name:'Pontocho Alley restaurant',city:'Kyoto',type:'Izakaya',notes:'Riverside dining - pick one that looks good',day:''},
+  {id:'r8',name:'Hoto Fudo',city:'Mt. Fuji',type:'Japanese',notes:'Famous local hoto noodle dish - hearty miso stew with flat noodles. Very popular near Kawaguchiko.',day:''},
+  {id:'r9',name:'Onsen dinner at hotel',city:'Mt. Fuji',type:'Japanese',notes:'Most onsen hotels include dinner - kaiseki multi-course meal',day:''}
 ];
 
 var SIGHTS_DEFAULT=[
@@ -616,7 +618,10 @@ var SIGHTS_DEFAULT=[
   {id:'s18',name:'Dotonbori',city:'Osaka',desc:'Neon-lit canal district, street food heaven',c:0,n:0,r:0},
   {id:'s19',name:'Osaka Castle',city:'Osaka',desc:'Iconic castle with beautiful grounds and museum',c:0,n:0,r:0},
   {id:'s20',name:'Shinsaibashisuji',city:'Osaka',desc:'Long covered shopping arcade in central Osaka',c:0,n:0,r:0},
-  {id:'s21',name:'Osaka Aquarium Kaiyukan',city:'Osaka',desc:'One of the best aquariums in the world - Reyna will love it',c:0,n:0,r:0}
+  {id:'s21',name:'Osaka Aquarium Kaiyukan',city:'Osaka',desc:'One of the best aquariums in the world - Reyna will love it',c:0,n:0,r:0},
+  {id:'s22',name:'Lake Kawaguchiko',city:'Mt. Fuji',desc:'Stunning lake views of Mt. Fuji - best photo spot in Japan',c:0,n:0,r:0},
+  {id:'s23',name:'Chureito Pagoda',city:'Mt. Fuji',desc:'Iconic five-story pagoda with Mt. Fuji backdrop - steep climb but worth it',c:0,n:0,r:0},
+  {id:'s24',name:'Fuji Panorama Ropeway',city:'Mt. Fuji',desc:'Cable car with aerial views of the lake and Mt. Fuji',c:0,n:0,r:0}
 ];
 
 var RESTS, SIGHTS_DATA, activePerson;
@@ -649,7 +654,7 @@ function buildRestaurants() {
   // Filter buttons - no inline onclick to avoid quote issues
   h += '<div class="card" id="restFilters">';
   h += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">';
-  ['All','Tokyo','Kyoto','Osaka','Okinawa'].forEach(function(c) {
+  ['All','Tokyo','Mt. Fuji','Kyoto','Osaka','Okinawa'].forEach(function(c) {
     h += '<button class="qbtn rfc-btn' + (fc===c?' active-filter':'') + '" data-v="' + c + '">' + c + '</button>';
   });
   h += '</div><div style="display:flex;gap:6px;flex-wrap:wrap;">';
@@ -708,7 +713,7 @@ function buildSights() {
   });
   h += '</div>';
   h += '<div style="display:flex;gap:6px;flex-wrap:wrap;">';
-  ['All','Tokyo','Kyoto','Osaka','Okinawa'].forEach(function(c) {
+  ['All','Tokyo','Mt. Fuji','Kyoto','Osaka','Okinawa'].forEach(function(c) {
     h += '<button class="qbtn sfc-btn' + (fc===c?' active-filter':'') + '" data-v="' + c + '">' + c + '</button>';
   });
   h += '</div></div>';
@@ -726,13 +731,21 @@ function buildSights() {
       stars += '<span onclick="voteSight2(' + si + ',' + n + ')" style="cursor:pointer;font-size:20px;' + (n<=myScore?'':'filter:grayscale(1);opacity:0.3;') + '">&#11088;</span>';
     }
     var total = (sight.c||0)+(sight.n||0)+(sight.r||0);
+    var mapsUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(sight.name + ' ' + sight.city + ' Japan');
     h += '<div class="card" style="margin-bottom:8px;">';
+    h += '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">';
+    h += '<div style="flex:1;">';
     h += '<div style="font-size:14px;font-weight:500;margin-bottom:4px;">' + esc(sight.name);
     h += ' <span style="font-size:10px;background:#eaf5ea;color:#1e8449;padding:2px 6px;border-radius:4px;font-weight:500;">' + esc(sight.city) + '</span></div>';
     h += '<div style="font-size:12px;color:var(--muted);margin-bottom:8px;">' + esc(sight.desc) + '</div>';
     h += '<div style="margin-bottom:6px;">' + stars + '</div>';
     h += '<div style="font-size:11px;color:var(--muted);">Craig:' + (sight.c||0) + ' &nbsp; Nirusitha:' + (sight.n||0) + ' &nbsp; Reyna:' + (sight.r||0) + ' &nbsp; | Total: ' + total + ' &#11088;</div>';
     h += '</div>';
+    h += '<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">';
+    h += '<a href="' + mapsUrl + '" target="_blank" class="act-btn" style="opacity:1;text-decoration:none;text-align:center;">Map</a>';
+    h += '<button class="act-btn del" style="opacity:1;" onclick="delSight(' + si + ')">Del</button>';
+    h += '</div>';
+    h += '</div></div>';
   });
 
   h += '<div class="card"><button class="add-act-btn" style="width:100%" onclick="openAddSight()">+ Add sight</button></div>';
@@ -749,6 +762,13 @@ function voteSight2(si, stars) {
   else SIGHTS_DATA[si].r = stars;
   saveSIGHTS();
   buildSights();
+}
+function delSight(si) {
+  if(!confirm('Remove this sight?'))return;
+  SIGHTS_DATA.splice(si,1);
+  saveSIGHTS();
+  buildSights();
+  showToast('Removed');
 }
 
 var _editRI = null;
@@ -781,7 +801,7 @@ initRestSights();
     <h3>Add / Edit Restaurant</h3>
     <div class="field"><label>Name *</label><input id="rName" type="text" placeholder="e.g. Ichiran Ramen"></div>
     <div class="field"><label>City</label>
-      <select id="rCity"><option>Tokyo</option><option>Kyoto</option><option>Osaka</option><option>Okinawa</option><option>Other</option></select>
+      <select id="rCity"><option>Tokyo</option><option>Mt. Fuji</option><option>Kyoto</option><option>Osaka</option><option>Okinawa</option><option>Other</option></select>
     </div>
     <div class="field"><label>Type</label>
       <select id="rType"><option>Japanese</option><option>Ramen</option><option>Sushi</option><option>Izakaya</option><option>Street Food</option><option>Cafe/Other</option></select>
@@ -800,7 +820,7 @@ initRestSights();
     <h3>Add Sight</h3>
     <div class="field"><label>Name *</label><input id="sName" type="text" placeholder="e.g. Senso-ji Temple"></div>
     <div class="field"><label>City</label>
-      <select id="sCity"><option>Tokyo</option><option>Kyoto</option><option>Osaka</option><option>Okinawa</option><option>Other</option></select>
+      <select id="sCity"><option>Tokyo</option><option>Mt. Fuji</option><option>Kyoto</option><option>Osaka</option><option>Okinawa</option><option>Other</option></select>
     </div>
     <div class="field"><label>Description</label><textarea id="sDesc" placeholder="What makes it special..."></textarea></div>
     <div class="modal-actions">
