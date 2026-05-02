@@ -567,8 +567,42 @@ function togglePackIdx(si,ii){var item=PACKING[si].items[ii];packState[item]=!pa
 function togglePack(item){packState[item]=!packState[item];savePackState();buildPacking();}
 function addPack(si){var inp=document.getElementById('pa_'+si);var val=inp.value.trim();if(!val)return;if(PACKING[si]&&PACKING[si].items.indexOf(val)===-1)PACKING[si].items.push(val);inp.value='';savePackState();buildPacking();}
 function resetPack(){if(confirm('Reset all checkboxes?')){packState={};savePackState();buildPacking();}}
-function loadInfo(){try{var s=localStorage.getItem('japan26_info');if(s){var d=JSON.parse(s);INFO_IDS.forEach(function(id){var el=document.getElementById(id);if(el&&d[id])el.value=d[id];});}}catch(e){}}
-function saveInfo(){var d={};INFO_IDS.forEach(function(id){var el=document.getElementById(id);if(el)d[id]=el.value;});try{localStorage.setItem('japan26_info',JSON.stringify(d));}catch(e){}}
+function loadInfo(){
+  // Try Google Sheets first
+  fetch(SCRIPT_URL+'?action=getInfo')
+    .then(function(r){return r.json();})
+    .then(function(rows){
+      if(rows&&rows.length>0){
+        // rows is array of [id, value] pairs
+        var d={};
+        rows.forEach(function(row){if(row[0])d[row[0]]=row[1]||'';});
+        INFO_IDS.forEach(function(id){var el=document.getElementById(id);if(el&&d[id])el.value=d[id];});
+        try{localStorage.setItem('japan26_info',JSON.stringify(d));}catch(e){}
+      } else {
+        // Fall back to localStorage
+        try{var s=localStorage.getItem('japan26_info');if(s){var d=JSON.parse(s);INFO_IDS.forEach(function(id){var el=document.getElementById(id);if(el&&d[id])el.value=d[id];});}}catch(e){}
+      }
+    })
+    .catch(function(){
+      // Offline - use localStorage
+      try{var s=localStorage.getItem('japan26_info');if(s){var d=JSON.parse(s);INFO_IDS.forEach(function(id){var el=document.getElementById(id);if(el&&d[id])el.value=d[id];});}}catch(e){}
+    });
+}
+var _infoSaveTimer=null;
+function saveInfo(){
+  var d={};INFO_IDS.forEach(function(id){var el=document.getElementById(id);if(el)d[id]=el.value;});
+  try{localStorage.setItem('japan26_info',JSON.stringify(d));}catch(e){}
+  // Debounce - save to sheets 1.5s after last keystroke
+  if(_infoSaveTimer)clearTimeout(_infoSaveTimer);
+  _infoSaveTimer=setTimeout(function(){
+    var rows=[];
+    INFO_IDS.forEach(function(id){var el=document.getElementById(id);if(el&&el.value)rows.push([id,el.value]);});
+    showSync('Saving...');
+    fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'saveInfo',rows:rows})})
+      .then(function(){showSync('Saved!',true);})
+      .catch(function(){showSync('Saved locally',true);});
+  },1500);
+}
 function switchTab(tab){
   document.querySelectorAll('.nav-tab').forEach(function(t){t.classList.remove('active');});
   document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
@@ -586,15 +620,15 @@ function showToast(msg){var t=document.getElementById('toast');t.textContent=msg
 /* ==================== RESTAURANTS & SIGHTS ==================== */
 
 var RESTAURANTS_DEFAULT=[
-  {id:'r1',name:'Benitsuru',city:'Tokyo',type:'Japanese',notes:'',day:''},
-  {id:'r2',name:'Ichiran Ramen',city:'Tokyo',type:'Ramen',notes:'Solo ramen booths - iconic experience',day:''},
-  {id:'r3',name:'Sushi Tokyo Ten',city:'Tokyo',type:'Sushi',notes:'',day:''},
-  {id:'r4',name:'Maruzen',city:'Tokyo',type:'Cafe/Other',notes:'',day:''},
-  {id:'r5',name:'Tsukiji Outer Market',city:'Tokyo',type:'Street Food',notes:'Best in the morning for fresh seafood',day:''},
-  {id:'r6',name:'Dotonbori Street Food',city:'Osaka',type:'Street Food',notes:'Takoyaki, okonomiyaki, kushikatsu',day:''},
-  {id:'r7',name:'Pontocho Alley restaurant',city:'Kyoto',type:'Izakaya',notes:'Riverside dining - pick one that looks good',day:''},
-  {id:'r8',name:'Hoto Fudo',city:'Mt. Fuji',type:'Japanese',notes:'Famous local hoto noodle dish - hearty miso stew with flat noodles. Very popular near Kawaguchiko.',day:''},
-  {id:'r9',name:'Onsen dinner at hotel',city:'Mt. Fuji',type:'Japanese',notes:'Most onsen hotels include dinner - kaiseki multi-course meal',day:''}
+  {id:'r1',name:'Benitsuru',city:'Tokyo',type:'Japanese',notes:'',day:'',tried:false,rating:0,returnVisit:false,resRequired:'Unknown',resInfo:''},
+  {id:'r2',name:'Ichiran Ramen',city:'Tokyo',type:'Ramen',notes:'Solo ramen booths - iconic experience',day:'',tried:false,rating:0,returnVisit:false,resRequired:'Not needed',resInfo:''},
+  {id:'r3',name:'Sushi Tokyo Ten',city:'Tokyo',type:'Sushi',notes:'',day:'',tried:false,rating:0,returnVisit:false,resRequired:'Unknown',resInfo:''},
+  {id:'r4',name:'Maruzen',city:'Tokyo',type:'Cafe',notes:'',day:'',tried:false,rating:0,returnVisit:false,resRequired:'Not needed',resInfo:''},
+  {id:'r5',name:'Tsukiji Outer Market',city:'Tokyo',type:'Street Food',notes:'Best in the morning for fresh seafood',day:'',tried:false,rating:0,returnVisit:false,resRequired:'Not needed',resInfo:''},
+  {id:'r6',name:'Dotonbori Street Food',city:'Osaka',type:'Street Food',notes:'Takoyaki, okonomiyaki, kushikatsu',day:'',tried:false,rating:0,returnVisit:false,resRequired:'Not needed',resInfo:''},
+  {id:'r7',name:'Pontocho Alley restaurant',city:'Kyoto',type:'Izakaya',notes:'Riverside dining - pick one that looks good',day:'',tried:false,rating:0,returnVisit:false,resRequired:'Recommended',resInfo:''},
+  {id:'r8',name:'Hoto Fudo',city:'Mt. Fuji',type:'Japanese',notes:'Famous local hoto noodle dish - hearty miso stew with flat noodles',day:'',tried:false,rating:0,returnVisit:false,resRequired:'Not needed',resInfo:''},
+  {id:'r9',name:'Onsen dinner at hotel',city:'Mt. Fuji',type:'Japanese',notes:'Most onsen hotels include dinner - kaiseki multi-course meal',day:'',tried:false,rating:0,returnVisit:false,resRequired:'Included',resInfo:''}
 ];
 
 var SIGHTS_DEFAULT=[
@@ -643,56 +677,83 @@ function saveSIGHTS() { try { localStorage.setItem('j26_sights', JSON.stringify(
 
 var DAY_OPTIONS = ['Any day','May 3 - Departure','May 4 - Arrive Tokyo','May 5 - Tokyo','May 6 - Tokyo','May 7 - Disneyland','May 8 - DisneySea','May 9 - Tokyo','May 10 - Mt Fuji','May 11 - Kyoto','May 12 - Kyoto','May 13 - Kyoto','May 14 - Osaka','May 15 - Okinawa','May 16 - Okinawa','May 17 - Okinawa','May 18 - Travel','May 19 - Fly home'];
 
-function buildRestaurants() {
-  var el = document.getElementById('restContent');
-  if (!el) return;
-  if (!RESTS) initRestSights();
-  var fc = window._rfc || 'All';
-  var ft = window._rft || 'All';
-  var h = '';
+function buildRestaurants(){
+  var el=document.getElementById('restContent');
+  if(!el)return;
+  if(!RESTS)initRestSights();
+  var fc=window._rfc||'All';
+  var ft=window._rft||'All';
+  var h='';
 
-  // Filter buttons - no inline onclick to avoid quote issues
-  h += '<div class="card" id="restFilters">';
-  h += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">';
-  ['All','Tokyo','Mt. Fuji','Kyoto','Osaka','Okinawa'].forEach(function(c) {
-    h += '<button class="qbtn rfc-btn' + (fc===c?' active-filter':'') + '" data-v="' + c + '">' + c + '</button>';
+  // City filter
+  h+='<div class="card"><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">';
+  ['All','Tokyo','Mt. Fuji','Kyoto','Osaka','Okinawa'].forEach(function(c){
+    h+='<button class="qbtn rfc-btn'+(fc===c?' active-filter':'')+'" data-v="'+c+'">'+c+'</button>';
   });
-  h += '</div><div style="display:flex;gap:6px;flex-wrap:wrap;">';
-  ['All','Ramen','Sushi','Izakaya','Street Food','Japanese','Cafe/Other'].forEach(function(t) {
-    h += '<button class="qbtn rft-btn' + (ft===t?' active-filter':'') + '" data-v="' + t + '">' + t + '</button>';
+  h+='</div><div style="display:flex;gap:6px;flex-wrap:wrap;">';
+  ['All','Ramen','Sushi','Sashimi','Izakaya','Japanese','Tempura','Yakitori','Teppanyaki','Kaiseki','Udon','Soba','Bento','Street Food','Seafood','BBQ','Cafe','Bar','Pizza','Vegetarian','Dessert','Other'].forEach(function(t){
+    h+='<button class="qbtn rft-btn'+(ft===t?' active-filter':'')+'" data-v="'+t+'">'+t+'</button>';
   });
-  h += '</div></div>';
+  h+='</div></div>';
 
-  var list = RESTS.filter(function(r) {
-    return (fc==='All'||r.city===fc) && (ft==='All'||r.type===ft);
+  var list=RESTS.filter(function(r){return (fc==='All'||r.city===fc)&&(ft==='All'||r.type===ft);});
+  if(!list.length){h+='<div class="card"><p style="color:var(--muted);font-size:13px;text-align:center;padding:1rem">No restaurants match this filter</p></div>';}
+
+  list.forEach(function(r){
+    var ri=RESTS.indexOf(r);
+    var resColor=r.resRequired==='Required'?'#c0392b':r.resRequired==='Recommended'?'#e67e22':'#27ae60';
+    var ratingStars='';
+    for(var n=1;n<=5;n++){
+      ratingStars+='<span onclick="rateRest('+ri+','+n+')" style="cursor:pointer;font-size:16px;'+(n<=(r.rating||0)?'':'filter:grayscale(1);opacity:0.3;')+'" title="'+n+' star'+(n>1?'s':'')+'">&#11088;</span>';
+    }
+
+    h+='<div class="card" style="margin-bottom:10px;">';
+    // Header row
+    h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px;">';
+    h+='<div style="flex:1;">';
+    h+='<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;">';
+    h+='<span style="font-size:14px;font-weight:500;">'+(r.tried?'<span style="color:#27ae60;">&#10003;</span> ':'')+esc(r.name)+'</span>';
+    h+='<span style="font-size:10px;background:#e8f0fb;color:#1a5276;padding:2px 6px;border-radius:4px;font-weight:500;">'+esc(r.type)+'</span>';
+    h+='<span style="font-size:10px;color:var(--muted);">'+esc(r.city)+'</span>';
+    h+='</div>';
+    if(r.notes)h+='<div style="font-size:12px;color:var(--muted);font-style:italic;margin-bottom:6px;">'+esc(r.notes)+'</div>';
+    h+='</div>';
+    h+='<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">';
+    h+='<button class="act-btn" style="opacity:1" onclick="editRestaurant('+ri+')">Edit</button>';
+    h+='<button class="act-btn del" style="opacity:1" onclick="delRestaurant('+ri+')">Del</button>';
+    h+='</div></div>';
+
+    // Reservation row
+    h+='<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:8px;">';
+    h+='<span style="font-size:11px;font-weight:500;color:var(--muted);">RESERVATION</span>';
+    h+='<span style="font-size:11px;font-weight:500;color:'+resColor+';">'+esc(r.resRequired||'Unknown')+'</span>';
+    if(r.resInfo)h+='<span style="font-size:11px;color:var(--muted);">— '+esc(r.resInfo)+'</span>';
+    h+='</div>';
+
+    // Day link + tried + rating + return
+    h+='<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">';
+    // Day
+    h+='<div style="display:flex;align-items:center;gap:4px;">';
+    h+='<span style="font-size:11px;color:var(--muted);">Day:</span>';
+    h+='<select style="font-size:12px;padding:2px 6px;border:1px solid var(--border);border-radius:6px;background:var(--paper);color:var(--ink);" onchange="RESTS['+ri+'].day=this.value;saveRESTS()">';
+    DAY_OPTIONS.forEach(function(d,di){h+='<option value="'+di+'"'+(String(r.day)===String(di)?' selected':'')+'>'+esc(d)+'</option>';});
+    h+='</select></div>';
+    // Tried
+    h+='<label style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:4px;cursor:pointer;">';
+    h+='<input type="checkbox" '+(r.tried?'checked':'')+' onchange="RESTS['+ri+'].tried=this.checked;if(!this.checked)RESTS['+ri+'].rating=0;saveRESTS();buildRestaurants()"> Tried it</label>';
+    // Rating (only if tried)
+    if(r.tried){
+      h+='<div style="display:flex;align-items:center;gap:2px;">'+ratingStars+'</div>';
+      // Worth return
+      h+='<label style="font-size:12px;color:var(--muted);display:flex;align-items:center;gap:4px;cursor:pointer;">';
+      h+='<input type="checkbox" '+(r.returnVisit?'checked':'')+' onchange="RESTS['+ri+'].returnVisit=this.checked;saveRESTS();buildRestaurants()"> Worth a return</label>';
+    }
+    h+='</div>';
+    h+='</div>';
   });
 
-  list.forEach(function(r, i) {
-    var ri = RESTS.indexOf(r);
-    h += '<div class="card" style="margin-bottom:8px;">';
-    h += '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">';
-    h += '<div style="flex:1">';
-    h += '<div style="font-size:14px;font-weight:500;">' + esc(r.name) + '</div>';
-    h += '<div style="font-size:12px;color:var(--muted);margin:4px 0;">';
-    h += '<span style="background:#e8f0fb;color:#1a5276;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:500;margin-right:6px;">' + esc(r.type) + '</span>' + esc(r.city);
-    h += '</div>';
-    if (r.notes) h += '<div style="font-size:12px;color:var(--muted);font-style:italic;margin-bottom:6px;">' + esc(r.notes) + '</div>';
-    h += '<div style="display:flex;align-items:center;gap:6px;margin-top:4px;">';
-    h += '<span style="font-size:11px;color:var(--muted);">Day:</span>';
-    h += '<select style="font-size:12px;padding:3px 6px;border:1px solid var(--border);border-radius:6px;background:var(--paper);color:var(--ink);" onchange="RESTS[' + ri + '].day=this.value;saveRESTS()">';
-    DAY_OPTIONS.forEach(function(d, di) {
-      h += '<option value="' + di + '"' + (String(r.day)===String(di)?' selected':'') + '>' + esc(d) + '</option>';
-    });
-    h += '</select></div></div>';
-    h += '<div style="display:flex;flex-direction:column;gap:4px;">';
-    h += '<button class="act-btn" style="opacity:1" onclick="editRestaurant(' + ri + ')">Edit</button>';
-    h += '<button class="act-btn del" style="opacity:1" onclick="delRestaurant(' + ri + ')">Del</button>';
-    h += '</div></div></div>';
-  });
-
-  h += '<div class="card"><button class="add-act-btn" style="width:100%" onclick="openAddRest()">+ Add restaurant</button></div>';
-  el.innerHTML = h;
-  // Attach filter handlers via event delegation
+  h+='<div class="card"><button class="add-act-btn" style="width:100%" onclick="openAddRest()">+ Add restaurant</button></div>';
+  el.innerHTML=h;
   el.querySelectorAll('.rfc-btn').forEach(function(btn){btn.addEventListener('click',function(){window._rfc=this.dataset.v;buildRestaurants();});});
   el.querySelectorAll('.rft-btn').forEach(function(btn){btn.addEventListener('click',function(){window._rft=this.dataset.v;buildRestaurants();});});
 }
@@ -772,10 +833,11 @@ function delSight(si) {
 }
 
 var _editRI = null;
-function openAddRest() { _editRI=null; document.getElementById('rName').value=''; document.getElementById('rCity').value='Tokyo'; document.getElementById('rType').value='Japanese'; document.getElementById('rNotes').value=''; document.getElementById('restModalBg').classList.add('open'); setTimeout(function(){document.getElementById('rName').focus();},80); }
-function editRestaurant(ri) { _editRI=ri; var r=RESTS[ri]; document.getElementById('rName').value=r.name||''; document.getElementById('rCity').value=r.city||'Tokyo'; document.getElementById('rType').value=r.type||'Japanese'; document.getElementById('rNotes').value=r.notes||''; document.getElementById('restModalBg').classList.add('open'); setTimeout(function(){document.getElementById('rName').focus();},80); }
-function saveRestaurant() { var name=document.getElementById('rName').value.trim(); if(!name)return; var r={id:uid(),name:name,city:document.getElementById('rCity').value,type:document.getElementById('rType').value,notes:document.getElementById('rNotes').value.trim(),day:''}; if(_editRI!==null){r.id=RESTS[_editRI].id;r.day=RESTS[_editRI].day;RESTS[_editRI]=r;}else{RESTS.push(r);} saveRESTS(); document.getElementById('restModalBg').classList.remove('open'); buildRestaurants(); showToast(_editRI!==null?'Updated':'Added'); }
+function openAddRest() { _editRI=null; document.getElementById('rName').value=''; document.getElementById('rCity').value='Tokyo'; document.getElementById('rType').value='Ramen'; document.getElementById('rNotes').value=''; document.getElementById('rResRequired').value='Unknown'; document.getElementById('rResInfo').value=''; document.getElementById('restModalBg').classList.add('open'); setTimeout(function(){document.getElementById('rName').focus();},80); }
+function editRestaurant(ri) { _editRI=ri; var r=RESTS[ri]; document.getElementById('rName').value=r.name||''; document.getElementById('rCity').value=r.city||'Tokyo'; document.getElementById('rType').value=r.type||'Ramen'; document.getElementById('rNotes').value=r.notes||''; document.getElementById('rResRequired').value=r.resRequired||'Unknown'; document.getElementById('rResInfo').value=r.resInfo||''; document.getElementById('restModalBg').classList.add('open'); setTimeout(function(){document.getElementById('rName').focus();},80); }
+function saveRestaurant() { var name=document.getElementById('rName').value.trim(); if(!name)return; var r={id:uid(),name:name,city:document.getElementById('rCity').value,type:document.getElementById('rType').value,notes:document.getElementById('rNotes').value.trim(),resRequired:document.getElementById('rResRequired').value,resInfo:document.getElementById('rResInfo').value.trim(),day:'',tried:false,rating:0,returnVisit:false}; if(_editRI!==null){r.id=RESTS[_editRI].id;r.day=RESTS[_editRI].day;r.tried=RESTS[_editRI].tried||false;r.rating=RESTS[_editRI].rating||0;r.returnVisit=RESTS[_editRI].returnVisit||false;RESTS[_editRI]=r;}else{RESTS.push(r);} saveRESTS(); document.getElementById('restModalBg').classList.remove('open'); buildRestaurants(); showToast(_editRI!==null?'Updated':'Added'); }
 function delRestaurant(ri) { if(!confirm('Remove?'))return; RESTS.splice(ri,1); saveRESTS(); buildRestaurants(); showToast('Removed'); }
+function rateRest(ri,stars){ if(!RESTS[ri])return; RESTS[ri].rating=stars; saveRESTS(); buildRestaurants(); }
 
 var _editSI = null;
 function openAddSight() { _editSI=null; document.getElementById('sName').value=''; document.getElementById('sCity').value='Tokyo'; document.getElementById('sDesc').value=''; document.getElementById('sightModalBg').classList.add('open'); setTimeout(function(){document.getElementById('sName').focus();},80); }
@@ -804,9 +866,25 @@ initRestSights();
       <select id="rCity"><option>Tokyo</option><option>Mt. Fuji</option><option>Kyoto</option><option>Osaka</option><option>Okinawa</option><option>Other</option></select>
     </div>
     <div class="field"><label>Type</label>
-      <select id="rType"><option>Japanese</option><option>Ramen</option><option>Sushi</option><option>Izakaya</option><option>Street Food</option><option>Cafe/Other</option></select>
+      <select id="rType">
+        <option>Ramen</option><option>Sushi</option><option>Sashimi</option><option>Izakaya</option>
+        <option>Japanese</option><option>Tempura</option><option>Yakitori</option><option>Teppanyaki</option>
+        <option>Kaiseki</option><option>Udon</option><option>Soba</option><option>Bento</option>
+        <option>Street Food</option><option>Seafood</option><option>BBQ</option><option>Cafe</option>
+        <option>Bar</option><option>Pizza</option><option>Vegetarian</option><option>Dessert</option><option>Other</option>
+      </select>
     </div>
-    <div class="field"><label>Notes</label><textarea id="rNotes" placeholder="Booking tips, must-orders, hours..."></textarea></div>
+    <div class="field"><label>Notes</label><textarea id="rNotes" placeholder="Must-orders, hours, tips..."></textarea></div>
+    <div class="field"><label>Reservation</label>
+      <select id="rResRequired">
+        <option value="Unknown">Unknown</option>
+        <option value="Required">Required</option>
+        <option value="Recommended">Recommended</option>
+        <option value="Not needed">Not needed</option>
+        <option value="Included">Included with hotel</option>
+      </select>
+    </div>
+    <div class="field"><label>Reservation details</label><input id="rResInfo" type="text" placeholder="Booking ref, time, phone number..."></div>
     <div class="modal-actions">
       <button class="mbtn" onclick="document.getElementById('restModalBg').classList.remove('open')">Cancel</button>
       <button class="mbtn primary" onclick="saveRestaurant()">Save</button>
