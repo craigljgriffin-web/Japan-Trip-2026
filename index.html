@@ -472,22 +472,29 @@ function loadWeather(){
   var pending = 0;
   var results = {};
 
+  // Count unique cities first
+  TRIP_CITIES.forEach(function(tc) { if(!fetched[tc.city]){fetched[tc.city]=false;pending++;} });
+  var fetched2={};
   TRIP_CITIES.forEach(function(tc) {
     var key = tc.city;
-    if(fetched[key]) return;
-    fetched[key] = true;
-    pending++;
+    if(fetched2[key]) return;
+    fetched2[key] = true;
     var url = 'https://api.open-meteo.com/v1/forecast?latitude='+tc.lat+'&longitude='+tc.lon+
       '&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weathercode,time'+
       '&timezone=auto&forecast_days=20';
     fetch(url)
       .then(function(r){return r.json();})
       .then(function(data){
-        results[key] = data.daily;
+        // data.daily contains time, weathercode, temp arrays
+        if(data && data.daily && data.daily.time){
+          results[key] = data.daily;
+        } else {
+          results[key] = null;
+        }
         pending--;
         if(pending===0) renderWeather(con, results);
       })
-      .catch(function(){
+      .catch(function(err){
         results[key] = null;
         pending--;
         if(pending===0) renderWeather(con, results);
