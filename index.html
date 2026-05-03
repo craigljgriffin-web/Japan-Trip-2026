@@ -463,43 +463,51 @@ function wdesc(c){if(c===0)return 'Clear sky';if(c<=2)return 'Partly cloudy';if(
 function wicon(c){if(c===0)return '&#9728;';if(c<=2)return '&#9925;';if(c===3)return '&#9729;';if(c<=49)return '&#127787;';if(c<=59)return '&#127782;';if(c<=69)return '&#127783;';if(c<=79)return '&#10052;';if(c<=99)return '&#9928;';return '&#9728;';}
 
 function loadWeather(){
-  var con = document.getElementById('weatherContent');
-  if(!con) return;
-  con.innerHTML = '<div class="loading">Loading forecasts...</div>';
+  var con=document.getElementById('weatherContent');
+  if(!con)return;
+  con.innerHTML='<div class="loading">Loading forecasts...</div>';
 
-  // Fetch weather for each unique city
-  var fetched = {};
-  var pending = 0;
-  var results = {};
+  var cities=[
+    {city:'Tokyo',   lat:35.68,lon:139.69},
+    {city:'Mt. Fuji',lat:35.50,lon:138.75},
+    {city:'Kyoto',   lat:35.01,lon:135.77},
+    {city:'Osaka',   lat:34.69,lon:135.50},
+    {city:'Okinawa', lat:26.21,lon:127.68}
+  ];
+  var results={};
+  var done=0;
 
-  // Count unique cities first
-  TRIP_CITIES.forEach(function(tc) { if(!fetched[tc.city]){fetched[tc.city]=false;pending++;} });
-  var fetched2={};
-  TRIP_CITIES.forEach(function(tc) {
-    var key = tc.city;
-    if(fetched2[key]) return;
-    fetched2[key] = true;
-    var url = 'https://api.open-meteo.com/v1/forecast?latitude='+tc.lat+'&longitude='+tc.lon+
-      '&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weathercode,time'+
-      '&timezone=auto&forecast_days=20';
-    fetch(url)
-      .then(function(r){return r.json();})
+  function tryFetch(tc){
+    // Use AbortController for timeout
+    var controller=typeof AbortController!=='undefined'?new AbortController():null;
+    var timer=controller?setTimeout(function(){controller.abort();},8000):null;
+    var opts=controller?{signal:controller.signal}:{};
+
+    fetch('https://api.open-meteo.com/v1/forecast?latitude='+tc.lat+'&longitude='+tc.lon+
+      '&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weathercode'+
+      '&timezone=Asia%2FTokyo&forecast_days=20',opts)
+      .then(function(r){if(timer)clearTimeout(timer);return r.json();})
       .then(function(data){
-        // data.daily contains time, weathercode, temp arrays
-        if(data && data.daily && data.daily.time){
-          results[key] = data.daily;
-        } else {
-          results[key] = null;
-        }
-        pending--;
-        if(pending===0) renderWeather(con, results);
+        results[tc.city]=(data&&data.daily)?data.daily:null;
+        done++;
+        if(done===cities.length)renderWeather(con,results);
       })
-      .catch(function(err){
-        results[key] = null;
-        pending--;
-        if(pending===0) renderWeather(con, results);
+      .catch(function(){
+        if(timer)clearTimeout(timer);
+        results[tc.city]=null;
+        done++;
+        if(done===cities.length)renderWeather(con,results);
       });
-  });
+  }
+
+  cities.forEach(function(tc){tryFetch(tc);});
+
+  // Safety fallback - if nothing renders after 12s show error
+  setTimeout(function(){
+    if(con.innerHTML.indexOf('loading')>-1){
+      con.innerHTML='<div class="card"><p style="color:var(--muted);font-size:13px;">Weather could not load. Check your internet connection and try refreshing.</p></div>';
+    }
+  },12000);
 }
 
 function renderWeather(con, results){
