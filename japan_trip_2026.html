@@ -466,7 +466,6 @@ function loadWeather(){
   var con=document.getElementById('weatherContent');
   if(!con)return;
   con.innerHTML='<div class="loading">Loading forecasts...</div>';
-
   var cities=[
     {city:'Tokyo',   lat:35.68,lon:139.69},
     {city:'Mt. Fuji',lat:35.50,lon:138.75},
@@ -474,61 +473,36 @@ function loadWeather(){
     {city:'Osaka',   lat:34.69,lon:135.50},
     {city:'Okinawa', lat:26.21,lon:127.68}
   ];
-  var results={};
-  var done=0;
-
-  function tryFetch(tc){
-    // Use AbortController for timeout
-    var controller=typeof AbortController!=='undefined'?new AbortController():null;
-    var timer=controller?setTimeout(function(){controller.abort();},8000):null;
-    var opts=controller?{signal:controller.signal}:{};
-
-    fetch('https://api.open-meteo.com/v1/forecast?latitude='+tc.lat+'&longitude='+tc.lon+
-      '&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weathercode'+
-      '&timezone=Asia%2FTokyo&forecast_days=20',opts)
-      .then(function(r){if(timer)clearTimeout(timer);return r.json();})
-      .then(function(data){
-        results[tc.city]=(data&&data.daily)?data.daily:null;
-        done++;
-        if(done===cities.length)renderWeather(con,results);
-      })
-      .catch(function(){
-        if(timer)clearTimeout(timer);
-        results[tc.city]=null;
-        done++;
-        if(done===cities.length)renderWeather(con,results);
-      });
-  }
-
-  cities.forEach(function(tc){tryFetch(tc);});
-
-  // Safety fallback - if nothing renders after 12s show error
-  setTimeout(function(){
-    if(con.innerHTML.indexOf('loading')>-1){
-      con.innerHTML='<div class="card"><p style="color:var(--muted);font-size:13px;">Weather could not load. Check your internet connection and try refreshing.</p></div>';
-    }
-  },12000);
+  var results={};var done=0;
+  cities.forEach(function(tc){
+    fetch('https://api.open-meteo.com/v1/forecast?latitude='+tc.lat+'&longitude='+tc.lon+'&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weathercode&timezone=auto&forecast_days=16')
+      .then(function(r){return r.json();})
+      .then(function(data){results[tc.city]=data.daily||null;done++;if(done===cities.length)renderWeather(con,results);})
+      .catch(function(){results[tc.city]=null;done++;if(done===cities.length)renderWeather(con,results);});
+  });
+  setTimeout(function(){if(con.innerHTML.indexOf('oading')>-1)renderWeather(con,results);},10000);
 }
 
-function renderWeather(con, results){
-  var html='';
+function renderWeather(con,results){
   var CITY_DATES=[
-    {city:'Tokyo',    label:'May 4 – 9',   dates:['2026-05-04','2026-05-05','2026-05-06','2026-05-07','2026-05-08','2026-05-09']},
+    {city:'Tokyo',    label:'May 4 - 9',   dates:['2026-05-04','2026-05-05','2026-05-06','2026-05-07','2026-05-08','2026-05-09']},
     {city:'Mt. Fuji', label:'May 10',      dates:['2026-05-10']},
-    {city:'Kyoto',    label:'May 11 – 13', dates:['2026-05-11','2026-05-12','2026-05-13']},
+    {city:'Kyoto',    label:'May 11 - 13', dates:['2026-05-11','2026-05-12','2026-05-13']},
     {city:'Osaka',    label:'May 14',      dates:['2026-05-14']},
-    {city:'Okinawa',  label:'May 15 – 18', dates:['2026-05-15','2026-05-16','2026-05-17','2026-05-18']}
+    {city:'Okinawa',  label:'May 15 - 18', dates:['2026-05-15','2026-05-16','2026-05-17','2026-05-18']}
   ];
   var DAY_NAMES={'2026-05-04':'Mon','2026-05-05':'Tue','2026-05-06':'Wed','2026-05-07':'Thu','2026-05-08':'Fri','2026-05-09':'Sat','2026-05-10':'Sun','2026-05-11':'Mon','2026-05-12':'Tue','2026-05-13':'Wed','2026-05-14':'Thu','2026-05-15':'Fri','2026-05-16':'Sat','2026-05-17':'Sun','2026-05-18':'Mon'};
   var DATE_LABELS={'2026-05-04':'May 4','2026-05-05':'May 5','2026-05-06':'May 6','2026-05-07':'May 7','2026-05-08':'May 8','2026-05-09':'May 9','2026-05-10':'May 10','2026-05-11':'May 11','2026-05-12':'May 12','2026-05-13':'May 13','2026-05-14':'May 14','2026-05-15':'May 15','2026-05-16':'May 16','2026-05-17':'May 17','2026-05-18':'May 18'};
-
+  function wIcon(c){if(c===0)return'&#9728;';if(c<=2)return'&#9925;';if(c===3)return'&#9729;';if(c<=49)return'&#127787;';if(c<=69)return'&#127783;';if(c<=79)return'&#10052;';return'&#9928;';}
+  function wDesc(c){if(c===0)return'Sunny';if(c<=2)return'Partly cloudy';if(c===3)return'Cloudy';if(c<=49)return'Foggy';if(c<=59)return'Drizzle';if(c<=69)return'Rain';if(c<=79)return'Snow';return'Thunderstorm';}
+  var html='';
   CITY_DATES.forEach(function(tc){
     var daily=results[tc.city];
     html+='<div class="card" style="margin-bottom:12px;">';
     html+='<div style="margin-bottom:10px;"><div style="font-size:15px;font-weight:500;">'+tc.city+'</div>';
     html+='<div style="font-size:12px;color:var(--muted);">'+tc.label+'</div></div>';
     if(!daily||!daily.time){
-      html+='<div style="font-size:13px;color:var(--muted);font-style:italic;">Forecast unavailable — check connection</div></div>';
+      html+='<div style="font-size:13px;color:var(--muted);font-style:italic;">Forecast unavailable - check connection</div></div>';
       return;
     }
     tc.dates.forEach(function(dateStr){
@@ -537,15 +511,15 @@ function renderWeather(con, results){
       html+='<div style="width:80px;flex-shrink:0;"><div style="font-size:12px;font-weight:500;">'+DATE_LABELS[dateStr]+'</div>';
       html+='<div style="font-size:11px;color:var(--muted);">'+DAY_NAMES[dateStr]+'</div></div>';
       if(di<0){
-        html+='<div style="font-size:12px;color:var(--muted);font-style:italic;">Not yet in forecast range</div>';
+        html+='<div style="font-size:12px;color:var(--muted);font-style:italic;">Available closer to date</div>';
       } else {
         var code=daily.weathercode[di];
         var hi=Math.round(daily.temperature_2m_max[di]);
         var lo=Math.round(daily.temperature_2m_min[di]);
         var rain=daily.precipitation_probability_max[di]||0;
-        html+='<div style="font-size:20px;width:30px;">'+wicon(code)+'</div>';
-        html+='<div style="flex:1;"><div style="font-size:13px;">'+wdesc(code)+'</div>';
-        html+='<div style="font-size:12px;color:var(--muted);">'+lo+'° – '+hi+'°C &nbsp;·&nbsp; Rain '+rain+'%</div></div>';
+        html+='<div style="font-size:22px;width:34px;">'+wIcon(code)+'</div>';
+        html+='<div style="flex:1;"><div style="font-size:13px;font-weight:500;">'+wDesc(code)+'</div>';
+        html+='<div style="font-size:12px;color:var(--muted);">'+lo+'&deg; &ndash; '+hi+'&deg;C &nbsp;&middot;&nbsp; Rain '+rain+'%</div></div>';
       }
       html+='</div>';
     });
