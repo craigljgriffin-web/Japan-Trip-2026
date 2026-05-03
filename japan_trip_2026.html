@@ -250,7 +250,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);m
     <div class="info-row"><span class="info-label">Craig phone</span><span class="info-value"><input placeholder="Add number" oninput="saveInfo()" id="i_p1"></span></div>
     <div class="info-row"><span class="info-label">Wife phone</span><span class="info-value"><input placeholder="Add number" oninput="saveInfo()" id="i_p2"></span></div>
   </div>
-  <div class="hint">Tap any field to edit. Saves in your browser.</div>
+  <div class="hint">Tap any field to edit. Saves automatically.</div>
+  <div class="card" id="customInfoCard">
+    <div class="section-title">Custom bookings &amp; notes</div>
+    <div id="customInfoRows"></div>
+    <div style="margin-top:10px;display:flex;gap:8px;">
+      <input id="customInfoLabel" type="text" placeholder="Label (e.g. Kawaguchiko Bus)" style="flex:1;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:DM Sans,sans-serif;background:var(--paper);color:var(--ink);outline:none;">
+      <input id="customInfoValue" type="text" placeholder="Details / confirmation #" style="flex:2;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:DM Sans,sans-serif;background:var(--paper);color:var(--ink);outline:none;">
+      <button onclick="addCustomInfo()" style="padding:7px 14px;background:var(--ink);color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer;">Add</button>
+    </div>
+  </div>
 </div>
 
 <!-- RESTAURANTS TAB -->
@@ -469,8 +478,8 @@ function loadWeather(){
     fetched[key] = true;
     pending++;
     var url = 'https://api.open-meteo.com/v1/forecast?latitude='+tc.lat+'&longitude='+tc.lon+
-      '&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weathercode'+
-      '&timezone=auto&forecast_days=16';
+      '&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weathercode,time'+
+      '&timezone=auto&forecast_days=20';
     fetch(url)
       .then(function(r){return r.json();})
       .then(function(data){
@@ -486,59 +495,49 @@ function loadWeather(){
   });
 }
 
-function renderWeather(con, results) {
-  var html = '';
-  // Day names for May 2026
-  var MAY_DAYS = ['','Fri','Sat','Sun','Mon','Tue','Wed','Thu','Fri','Sat','Sun','Mon','Tue','Wed','Thu','Fri','Sat','Sun','Mon','Mon'];
-  var MAY_DATES = ['','May 1','May 2','May 3','May 4','May 5','May 6','May 7','May 8','May 9','May 10','May 11','May 12','May 13','May 14','May 15','May 16','May 17','May 18','May 19'];
+function renderWeather(con, results){
+  var html='';
+  var CITY_DATES=[
+    {city:'Tokyo',    label:'May 4 – 9',   dates:['2026-05-04','2026-05-05','2026-05-06','2026-05-07','2026-05-08','2026-05-09']},
+    {city:'Mt. Fuji', label:'May 10',      dates:['2026-05-10']},
+    {city:'Kyoto',    label:'May 11 – 13', dates:['2026-05-11','2026-05-12','2026-05-13']},
+    {city:'Osaka',    label:'May 14',      dates:['2026-05-14']},
+    {city:'Okinawa',  label:'May 15 – 18', dates:['2026-05-15','2026-05-16','2026-05-17','2026-05-18']}
+  ];
+  var DAY_NAMES={'2026-05-04':'Mon','2026-05-05':'Tue','2026-05-06':'Wed','2026-05-07':'Thu','2026-05-08':'Fri','2026-05-09':'Sat','2026-05-10':'Sun','2026-05-11':'Mon','2026-05-12':'Tue','2026-05-13':'Wed','2026-05-14':'Thu','2026-05-15':'Fri','2026-05-16':'Sat','2026-05-17':'Sun','2026-05-18':'Mon'};
+  var DATE_LABELS={'2026-05-04':'May 4','2026-05-05':'May 5','2026-05-06':'May 6','2026-05-07':'May 7','2026-05-08':'May 8','2026-05-09':'May 9','2026-05-10':'May 10','2026-05-11':'May 11','2026-05-12':'May 12','2026-05-13':'May 13','2026-05-14':'May 14','2026-05-15':'May 15','2026-05-16':'May 16','2026-05-17':'May 17','2026-05-18':'May 18'};
 
-  TRIP_CITIES.forEach(function(tc) {
-    var daily = results[tc.city];
-    html += '<div class="card" style="margin-bottom:12px;">';
-    html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">';
-    html += '<div><div style="font-size:15px;font-weight:500;">'+tc.city+'</div>';
-    html += '<div style="font-size:12px;color:var(--muted);">'+tc.dates+'</div></div>';
-    html += '</div>';
-
-    if(!daily){
-      html += '<div style="font-size:13px;color:var(--muted);font-style:italic;">Forecast unavailable — check closer to departure</div>';
-      html += '</div>';
+  CITY_DATES.forEach(function(tc){
+    var daily=results[tc.city];
+    html+='<div class="card" style="margin-bottom:12px;">';
+    html+='<div style="margin-bottom:10px;"><div style="font-size:15px;font-weight:500;">'+tc.city+'</div>';
+    html+='<div style="font-size:12px;color:var(--muted);">'+tc.label+'</div></div>';
+    if(!daily||!daily.time){
+      html+='<div style="font-size:13px;color:var(--muted);font-style:italic;">Forecast unavailable — check connection</div></div>';
       return;
     }
-
-    // Show one row per day we are there
-    for(var d = 0; d < tc.days; d++){
-      var mayDay = tc.startDay + d; // index into May (1=May1, 4=May4 etc)
-      // Find the index in the API response dates array
-      var dateStr = '2026-05-' + String(mayDay < 10 ? '0'+mayDay : mayDay);
-      var di = daily.time ? daily.time.indexOf(dateStr) : -1;
-
-      html += '<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);">';
-      html += '<div style="width:80px;flex-shrink:0;"><div style="font-size:12px;font-weight:500;">'+MAY_DATES[mayDay]+'</div>';
-      html += '<div style="font-size:11px;color:var(--muted);">'+MAY_DAYS[mayDay]+'</div></div>';
-
-      if(di < 0){
-        html += '<div style="font-size:12px;color:var(--muted);">Forecast not yet available</div>';
+    tc.dates.forEach(function(dateStr){
+      var di=daily.time.indexOf(dateStr);
+      html+='<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);">';
+      html+='<div style="width:80px;flex-shrink:0;"><div style="font-size:12px;font-weight:500;">'+DATE_LABELS[dateStr]+'</div>';
+      html+='<div style="font-size:11px;color:var(--muted);">'+DAY_NAMES[dateStr]+'</div></div>';
+      if(di<0){
+        html+='<div style="font-size:12px;color:var(--muted);font-style:italic;">Not yet in forecast range</div>';
       } else {
-        var code = daily.weathercode[di];
-        var hi = Math.round(daily.temperature_2m_max[di]);
-        var lo = Math.round(daily.temperature_2m_min[di]);
-        var rain = daily.precipitation_probability_max[di] || 0;
-        html += '<div style="font-size:20px;width:30px;">'+wicon(code)+'</div>';
-        html += '<div style="flex:1;">';
-        html += '<div style="font-size:13px;">'+wdesc(code)+'</div>';
-        html += '<div style="font-size:12px;color:var(--muted);">'+lo+'° – '+hi+'°C &nbsp;·&nbsp; Rain '+rain+'%</div>';
-        html += '</div>';
+        var code=daily.weathercode[di];
+        var hi=Math.round(daily.temperature_2m_max[di]);
+        var lo=Math.round(daily.temperature_2m_min[di]);
+        var rain=daily.precipitation_probability_max[di]||0;
+        html+='<div style="font-size:20px;width:30px;">'+wicon(code)+'</div>';
+        html+='<div style="flex:1;"><div style="font-size:13px;">'+wdesc(code)+'</div>';
+        html+='<div style="font-size:12px;color:var(--muted);">'+lo+'° – '+hi+'°C &nbsp;·&nbsp; Rain '+rain+'%</div></div>';
       }
-      html += '</div>';
-    }
-    html += '</div>';
+      html+='</div>';
+    });
+    html+='</div>';
   });
-
-  if(!html){
-    html = '<div class="card"><p style="color:var(--muted);font-size:13px;">Could not load forecasts. Try again closer to your trip.</p></div>';
-  }
-  con.innerHTML = html;
+  if(!html)html='<div class="card"><p style="color:var(--muted);font-size:13px;">Could not load forecasts.</p></div>';
+  con.innerHTML=html;
 }
 
 function loadRate(){fetch('https://api.frankfurter.app/latest?from=CAD&to=JPY').then(function(r){return r.json();}).then(function(d){cadRate=d.rates.JPY;document.getElementById('rateDisplay').textContent='1 CAD = '+cadRate.toFixed(2)+' JPY (live rate)';}).catch(function(){document.getElementById('rateDisplay').textContent='1 CAD = ~109 JPY (estimate)';});}
@@ -610,7 +609,7 @@ function switchTab(tab){
   document.getElementById('panel-'+tab).classList.add('active');
   if(tab==='weather')loadWeather();
   else if(tab==='packing')buildPacking();
-  else if(tab==='info')setTimeout(loadInfo,50);
+  else if(tab==='info'){setTimeout(loadInfo,50);setTimeout(loadCustomInfo,100);}
   else if(tab==='currency')loadRate();
   else if(tab==='restaurants'){if(!RESTS)initRestSights();buildRestaurants();}
   else if(tab==='sights'){if(!SIGHTS_DATA)initRestSights();buildSights();}
@@ -849,11 +848,55 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal()
 document.getElementById('fName').addEventListener('keydown',function(e){if(e.key==='Enter')saveActivity();});
 loadFromSheet(function(){buildDays();});
 loadRate();
-// Clear old broken localStorage data from previous versions
-try{
-  var rv=localStorage.getItem('japan26_rests_v');
-  if(rv!=='2'){localStorage.removeItem('japan26_rests');localStorage.removeItem('japan26_sights');localStorage.setItem('japan26_rests_v','2');}
-}catch(e){}
+
+/* ==================== CUSTOM KEY INFO ==================== */
+var customInfoItems = [];
+
+function loadCustomInfo(){
+  try{var s=localStorage.getItem('j26_custom');if(s)customInfoItems=JSON.parse(s);}catch(e){}
+  renderCustomInfo();
+}
+function saveCustomInfo(){
+  try{localStorage.setItem('j26_custom',JSON.stringify(customInfoItems));}catch(e){}
+  // Also save to sheets alongside regular info
+  var d={};
+  INFO_IDS.forEach(function(id){var el=document.getElementById(id);if(el)d[id]=el.value;});
+  var rows=[];
+  INFO_IDS.forEach(function(id){var el=document.getElementById(id);if(el&&el.value)rows.push([id,el.value]);});
+  customInfoItems.forEach(function(item,i){rows.push(['custom_'+i+'_label',item.label]);rows.push(['custom_'+i+'_value',item.value]);});
+  fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'saveInfo',rows:rows})})
+    .catch(function(){});
+}
+function renderCustomInfo(){
+  var el=document.getElementById('customInfoRows');
+  if(!el)return;
+  if(!customInfoItems.length){el.innerHTML='<div style="font-size:12px;color:var(--muted);font-style:italic;padding:4px 0;">No custom entries yet. Add bus bookings, tour confirmations, etc. below.</div>';return;}
+  var h='';
+  customInfoItems.forEach(function(item,i){
+    h+='<div class="info-row"><span class="info-label">'+esc(item.label)+'</span>';
+    h+='<span class="info-value" style="display:flex;align-items:center;gap:8px;">';
+    h+='<input value="'+esc(item.value)+'" onchange="customInfoItems['+i+'].value=this.value;saveCustomInfo()" style="border:none;background:none;font-size:13px;font-family:DM Sans,sans-serif;color:var(--ink);text-align:right;width:100%;outline:none;">';
+    h+='<button onclick="delCustomInfo('+i+')" style="border:none;background:none;cursor:pointer;font-size:16px;color:var(--muted);flex-shrink:0;">&times;</button>';
+    h+='</span></div>';
+  });
+  el.innerHTML=h;
+}
+function addCustomInfo(){
+  var label=document.getElementById('customInfoLabel').value.trim();
+  var value=document.getElementById('customInfoValue').value.trim();
+  if(!label)return;
+  customInfoItems.push({label:label,value:value});
+  document.getElementById('customInfoLabel').value='';
+  document.getElementById('customInfoValue').value='';
+  saveCustomInfo();
+  renderCustomInfo();
+}
+function delCustomInfo(i){
+  customInfoItems.splice(i,1);
+  saveCustomInfo();
+  renderCustomInfo();
+}
+// localStorage persistence enabled
 initRestSights();
 </script>
 
